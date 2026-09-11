@@ -1,0 +1,8 @@
+/* Cuarta prueba: jerarquía de pase completo, fines de semana y capacitaciones */
+.best-badge{font-size:.84rem!important;padding:8px 14px!important;right:12px!important;top:-14px!important;box-shadow:0 9px 20px rgba(103,73,22,.18)!important}
+.weekend-card{border-top-color:rgba(155,79,27,.55)}
+.weekend-label{color:var(--clay)!important}
+.weekend-summary{color:var(--clay);font-weight:900}
+.teacher-group .capacity-expandable{background:#eef3ea;color:#315a50;border:1px solid rgba(49,90,80,.18)}
+.teacher-activity{background:linear-gradient(90deg,#fff,rgba(240,245,238,.55))}
+@media(max-width:640px){.best-badge{font-size:.74rem!important;padding:7px 11px!important;top:-12px!important}.weekend-card{border-top-width:2px}}
