@@ -52,3 +52,7 @@ renderSummary=function(){
 };
 
 renderAll();
+
+const v5Script=document.createElement('script');
+v5Script.src='v5.js';
+document.head.appendChild(v5Script);
