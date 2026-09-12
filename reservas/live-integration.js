@@ -5,7 +5,7 @@
   if(qs.get('modo')!=='prueba-real')return;
 
   const APPS_SCRIPT_ENDPOINT='https://script.google.com/macros/s/AKfycbwMAwCaeJm8w1GrG1wb7iz1RFv3nP0Zl6szvrgoOEVfrrNAX9JD-Tw_t5G8sMzMGdI/exec';
-  const FRONTEND_VERSION='mp-2026-live-test-1';
+  const FRONTEND_VERSION='mp-2026-live-test-2';
 
   const banner=document.getElementById('testBanner');
   if(banner){
@@ -51,10 +51,9 @@
       const day=dayByDate(date);
       const acts=activitiesForDate(date);
       const detail=acts.length?` · ${acts.map(activityDescription).join(' · ')}`:'';
-      const localDate=new Date(`${date}T12:00:00`);
       return {
         date,
-        fecha:localDate,
+        fecha:date,
         horario:'Pase',
         titulo:`${day?.label||date} · ${day?.theme||'Mundos Perdidos 2026'}${detail}`,
         taller_id:'',
@@ -74,7 +73,7 @@
       taller_nombre:'',
       modalidad:state.mode==='full'?'Pase completo':'Días particulares',
       tipo:'general',
-      fecha:rows[0]?.fecha||'',
+      fecha:dates[0]||'',
       horario:'Pase',
       fecha_resumen:readableDates,
       horario_resumen:'Pase',
@@ -139,7 +138,7 @@
       function cleanup(){
         clearTimeout(timer);
         try{delete window[callbackName];}catch(_){window[callbackName]=undefined;}
-        script.remove();
+        if(script.parentNode)script.parentNode.removeChild(script);
       }
 
       window[callbackName]=payload=>{
@@ -165,6 +164,75 @@
       script.src=`${APPS_SCRIPT_ENDPOINT}?${params.toString()}`;
       document.body.appendChild(script);
     });
+  }
+
+  function submitReservationDirectPost(data){
+    return new Promise((resolve,reject)=>{
+      const callbackId=`scassoPost_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+      const iframe=document.createElement('iframe');
+      iframe.name=callbackId;
+      iframe.style.display='none';
+      iframe.setAttribute('aria-hidden','true');
+
+      const form=document.createElement('form');
+      form.method='POST';
+      form.enctype='application/x-www-form-urlencoded';
+      form.action=APPS_SCRIPT_ENDPOINT;
+      form.target=callbackId;
+      form.style.display='none';
+
+      let finished=false;
+      const timer=setTimeout(()=>{
+        if(finished)return;
+        finished=true;
+        cleanup();
+        reject(new Error('Tiempo de espera del navegador.'));
+      },45000);
+
+      function cleanup(){
+        clearTimeout(timer);
+        window.removeEventListener('message',onMessage);
+        if(form.parentNode)form.parentNode.removeChild(form);
+        setTimeout(()=>{if(iframe.parentNode)iframe.parentNode.removeChild(iframe);},500);
+      }
+
+      function add(name,value){
+        const input=document.createElement('input');
+        input.type='hidden';
+        input.name=name;
+        input.value=value;
+        form.appendChild(input);
+      }
+
+      function onMessage(ev){
+        const msg=ev&&ev.data?ev.data:null;
+        if(!msg||msg.callbackId!==callbackId)return;
+        if(finished)return;
+        finished=true;
+        cleanup();
+        resolve(msg.result||{ok:false,message:'Respuesta vacía del servidor.'});
+      }
+
+      window.addEventListener('message',onMessage);
+      add('iframe','1');
+      add('callbackId',callbackId);
+      add('payload',JSON.stringify(compactPayload(data)));
+      document.body.appendChild(iframe);
+      document.body.appendChild(form);
+      form.submit();
+    });
+  }
+
+  async function submitReservationRobust(data){
+    try{
+      return await submitReservationDirectPost(data);
+    }catch(firstErr){
+      try{
+        return await submitReservationJSONP(data);
+      }catch(secondErr){
+        throw secondErr||firstErr;
+      }
+    }
   }
 
   function showSuccess(data,response){
@@ -216,10 +284,11 @@
     message.className='form-message';
 
     try{
-      const response=await submitReservationJSONP(data);
-      if(response&&(response.ok===false||response.success===false||response.error)){
-        throw new Error(response.error||response.message||'El servidor no pudo registrar la reserva.');
+      const response=await submitReservationRobust(data);
+      if(!response||response.ok===false||response.success===false||response.error){
+        throw new Error((response&&(response.error||response.message))||'El servidor no pudo registrar la reserva.');
       }
+      data.codigo_reserva=response.code||data.codigo_reserva;
       message.textContent=`Pre-reserva registrada: ${data.codigo_reserva}. Revisá tu correo.`;
       message.className='form-message success';
       showSuccess(data,response);
