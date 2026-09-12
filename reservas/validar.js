@@ -1,6 +1,6 @@
 'use strict';
 (()=>{
-  const BACKEND='https://script.google.com/macros/s/AKfycbzktEKSf2IhLeYb79s2uSBRWvo-cSBcRQq3lDi4bmGgVfK4WVNwpYg1QAho3PyS23XK/exec';
+  const BACKEND='https://script.google.com/macros/s/AKfycbyEmstX5x1ombFsYu57hqB9dvbcbGvbpld4-mvhY0FPq8y_K0vb-m_SZYK5sXY-y8bW/exec';
   const code=new URLSearchParams(location.search).get('c')||'';
   const statusBox=document.getElementById('status');
   const body=document.getElementById('body');
