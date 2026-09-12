@@ -53,6 +53,13 @@ renderSummary=function(){
 
 renderAll();
 
+// v5 incorpora Peces en su tinta y sus materiales. La integración con el backend
+// se carga únicamente después de v5 y sólo actúa si la URL lleva ?modo=prueba-real.
 const v5Script=document.createElement('script');
-v5Script.src='v5.js';
+v5Script.src='v5.js?v=2';
+v5Script.onload=()=>{
+  const liveScript=document.createElement('script');
+  liveScript.src='live-integration.js?v=1';
+  document.head.appendChild(liveScript);
+};
 document.head.appendChild(v5Script);
