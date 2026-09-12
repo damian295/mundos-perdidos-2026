@@ -16,12 +16,22 @@
   const delay=ms=>new Promise(r=>setTimeout(r,ms));
   const code=()=>`MSC-MUND-${new Date().toISOString().slice(0,10).replaceAll('-','')}-${Math.random().toString(36).slice(2,7).toUpperCase()}`;
   const ref=c=>`MUN-${c.split('-').pop()}`;
+  const shortDate=d=>{
+    const parts=String(d||'').split('-');
+    return parts.length===3?`${parts[2]}/${parts[1]}`:String(d||'');
+  };
 
   function payload(){
     const dates=selectedDates(),p=calculatePrice(),c=code();
     const acts=ACTIVITIES.filter(a=>Number(state.activityQty[a.id]||0)>0&&dates.includes(a.date));
     const actText=acts.map(a=>`${a.title} (${Number(state.activityQty[a.id]||0)} participante(s))`).join(' | ');
     const dni=document.getElementById('dni').value.replace(/\D/g,'');
+    const dateSummary=dates.length===DAYS.length
+      ? '26/09–04/10 · Pase completo'
+      : dates.length===1
+        ? shortDate(dates[0])
+        : `${dates.length} días seleccionados`;
+    const total=Math.round(Number(p.total||0));
     return {
       programa:'Mundos Perdidos 2026',
       programa_id:'mundos',
@@ -29,7 +39,7 @@
       tipo:'general',
       fecha:dates[0]||'',
       horario:'Pase',
-      fecha_resumen:dates.join(' | '),
+      fecha_resumen:dateSummary,
       horario_resumen:'Pase',
       fechas:dates.map(d=>({fecha:d,horario:'Pase',titulo:(dayByDate(d)?.theme||'Mundos Perdidos 2026')})),
       durationMinutes:480,
@@ -38,7 +48,7 @@
       menores:Number(state.free||0),
       acompanantes:0,
       grupos_necesarios:1,
-      precio_estimado:Number(p.total||0),
+      precio_estimado:`$${total}`,
       responsable:document.getElementById('responsible').value.trim(),
       telefono:document.getElementById('phone').value.trim(),
       email:document.getElementById('email').value.trim(),
@@ -127,7 +137,7 @@
         cleanup();
         reject(new Error('status-error'));
       };
-      const qs=new URLSearchParams({action:'status',callback:cb,code:codeValue,c:codeValue,v:'mp-live-4'});
+      const qs=new URLSearchParams({action:'status',callback:cb,code:codeValue,c:codeValue,v:'mp-live-5'});
       script.src=BACKEND+'?'+qs.toString();
       document.body.appendChild(script);
     });
