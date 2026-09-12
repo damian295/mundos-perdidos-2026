@@ -21,6 +21,7 @@
     const dates=selectedDates(),p=calculatePrice(),c=code();
     const acts=ACTIVITIES.filter(a=>Number(state.activityQty[a.id]||0)>0&&dates.includes(a.date));
     const actText=acts.map(a=>`${a.title} (${Number(state.activityQty[a.id]||0)} participante(s))`).join(' | ');
+    const dni=document.getElementById('dni').value.replace(/\D/g,'');
     return {
       programa:'Mundos Perdidos 2026',
       programa_id:'mundos',
@@ -41,7 +42,8 @@
       responsable:document.getElementById('responsible').value.trim(),
       telefono:document.getElementById('phone').value.trim(),
       email:document.getElementById('email').value.trim(),
-      dni:document.getElementById('dni').value.trim(),
+      dni:dni,
+      institucion:dni,
       ciudad:document.getElementById('city').value.trim(),
       temas:actText,
       accesibilidad:document.getElementById('notes').value.trim(),
@@ -125,7 +127,7 @@
         cleanup();
         reject(new Error('status-error'));
       };
-      const qs=new URLSearchParams({action:'status',callback:cb,code:codeValue,c:codeValue,v:'mp-live-3'});
+      const qs=new URLSearchParams({action:'status',callback:cb,code:codeValue,c:codeValue,v:'mp-live-4'});
       script.src=BACKEND+'?'+qs.toString();
       document.body.appendChild(script);
     });
@@ -197,7 +199,7 @@
       }
 
       data.codigo_reserva=r.code||data.codigo_reserva;
-      msg.textContent=`Pre-reserva registrada: ${data.codigo_reserva}. Revisá tu correo.`;
+      msg.textContent=`Pre-reserva registrada: ${data.codigo_reserva}. Te enviamos el ticket provisorio al correo indicado.`;
       msg.className='form-message success';
       btn.textContent='Pre-reserva registrada';
     }catch(ex){
