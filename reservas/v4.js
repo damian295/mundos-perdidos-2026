@@ -59,7 +59,7 @@ const v5Script=document.createElement('script');
 v5Script.src='v5.js?v=2';
 v5Script.onload=()=>{
   const liveScript=document.createElement('script');
-  liveScript.src='live-integration.js?v=5';
+  liveScript.src='live-integration.js?v=6';
   document.head.appendChild(liveScript);
 };
 document.head.appendChild(v5Script);
