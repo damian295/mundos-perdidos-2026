@@ -4,20 +4,64 @@
   const code=new URLSearchParams(location.search).get('c')||'';
   const statusBox=document.getElementById('status');
   const body=document.getElementById('body');
-  const esc=s=>String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+  const esc=s=>String(s??'').replace(/[&<>'\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','\"':'&quot;'}[c]));
   const today=()=>new Intl.DateTimeFormat('en-CA',{timeZone:'America/Argentina/Buenos_Aires',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+
   function check(){
     if(!code){renderError('QR inválido','Falta el código de reserva.');return;}
+    checkViaIframe();
+  }
+
+  // Método principal: el mismo canal iframe/postMessage que ya usa el sistema de reservas.
+  // Es más robusto en móviles que cargar la respuesta de Apps Script como <script> JSONP.
+  function checkViaIframe(){
+    const callbackId='qr_iframe_'+Date.now()+'_'+Math.random().toString(36).slice(2);
+    const frame=document.createElement('iframe');
+    frame.style.display='none';
+    frame.setAttribute('aria-hidden','true');
+    let finished=false;
+
+    function cleanup(){
+      window.removeEventListener('message',onMessage);
+      if(frame.parentNode)frame.remove();
+      clearTimeout(timer);
+    }
+    function fallback(){
+      if(finished)return;
+      finished=true;
+      cleanup();
+      checkViaJsonp();
+    }
+    function onMessage(ev){
+      const msg=ev&&ev.data;
+      if(!msg||msg.callbackId!==callbackId)return;
+      finished=true;
+      cleanup();
+      render(msg.result||{});
+    }
+
+    window.addEventListener('message',onMessage);
+    const timer=setTimeout(fallback,12000);
+    frame.onerror=fallback;
+    const qs=new URLSearchParams({action:'status',iframe:'1',callbackId:callbackId,code:code,c:code,v:'qr-2'});
+    frame.src=BACKEND+'?'+qs.toString();
+    document.body.appendChild(frame);
+  }
+
+  // Respaldo: JSONP, por compatibilidad con navegadores/redes donde el iframe no responda.
+  function checkViaJsonp(){
     const cb='qr_'+Date.now()+'_'+Math.random().toString(36).slice(2);
     const s=document.createElement('script');
-    const timer=setTimeout(()=>{cleanup();renderError('SIN RESPUESTA','No se pudo consultar Administración. Volvé a intentar.');},12000);
+    let done=false;
+    const timer=setTimeout(()=>{cleanup();if(!done)renderError('SIN RESPUESTA','No se pudo consultar Administración. Volvé a intentar.');},12000);
     function cleanup(){clearTimeout(timer);try{delete window[cb]}catch(_){window[cb]=undefined}if(s.parentNode)s.remove();}
-    window[cb]=r=>{cleanup();render(r||{});};
-    s.onerror=()=>{cleanup();renderError('ERROR DE CONEXIÓN','No se pudo consultar Administración.');};
-    const qs=new URLSearchParams({action:'status',callback:cb,code:code,c:code,v:'qr-1'});
+    window[cb]=r=>{done=true;cleanup();render(r||{});};
+    s.onerror=()=>{cleanup();if(!done)renderError('ERROR DE CONEXIÓN','No se pudo consultar Administración.');};
+    const qs=new URLSearchParams({action:'status',callback:cb,code:code,c:code,v:'qr-2'});
     s.src=BACKEND+'?'+qs.toString();
     document.body.appendChild(s);
   }
+
   function renderError(title,msg){
     statusBox.className='status bad';
     statusBox.innerHTML='<div class="eyebrow">Control de acceso</div><h1>'+esc(title)+'</h1><p>'+esc(msg)+'</p>';
