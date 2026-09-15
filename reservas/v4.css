@@ -5,4 +5,32 @@
 .weekend-summary{color:var(--clay);font-weight:900}
 .teacher-group .capacity-expandable{background:#eef3ea;color:#315a50;border:1px solid rgba(49,90,80,.18)}
 .teacher-activity{background:linear-gradient(90deg,#fff,rgba(240,245,238,.55))}
-@media(max-width:640px){.best-badge{font-size:.74rem!important;padding:7px 11px!important;top:-12px!important}.weekend-card{border-top-width:2px}}
+
+/* Ajustes finales de lectura */
+#summaryActivities.summary-list{font-weight:400!important;line-height:1.42}
+#summaryActivities .summary-activity-line{font-weight:400!important;color:#4f4439}
+#summaryActivities .summary-activity-line strong{font-weight:850;color:var(--deep)}
+.form-grid label{font-weight:500!important;color:#44382f!important}
+.form-grid label small{font-weight:400!important}
+.form-grid input,.form-grid textarea{font-weight:400!important}
+
+/* Menores de 3: dato secundario, deliberadamente más compacto */
+.minor-inline{max-width:330px!important;margin-left:auto!important;margin-top:5px!important;padding-top:5px!important;gap:7px!important;font-size:.74rem!important;opacity:.92}
+.minor-inline strong{font-size:.76rem!important;font-weight:700!important}
+.minor-inline small{font-size:.68rem!important;font-weight:500!important}
+.counter.compact{grid-template-columns:25px 29px 25px!important}
+.counter.compact button{height:25px!important;font-size:.88rem!important;padding:0!important}
+.counter.compact output{font-size:.78rem!important;font-weight:750!important}
+
+/* Capacitaciones: 50 es umbral de advertencia, no un corte de inscripción */
+.teacher-group .teacher-open{background:#eef3ea;color:#315a50;border:1px solid rgba(49,90,80,.18)}
+.teacher-group .capacity-warning{background:#fff0ed!important;color:#a13e2d!important;border:1px solid rgba(161,62,45,.38)!important;font-weight:950!important}
+
+/* Ya es la versión operativa; nunca mostrar carteles internos de prueba */
+.test-banner{display:none!important}
+
+@media(max-width:640px){
+  .best-badge{font-size:.74rem!important;padding:7px 11px!important;top:-12px!important}
+  .weekend-card{border-top-width:2px}
+  .minor-inline{max-width:100%!important;margin-left:0!important}
+}
