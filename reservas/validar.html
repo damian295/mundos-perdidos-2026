@@ -47,6 +47,13 @@ Ezt7tHHudHa87at49xvNXzCLu58OSxMH1hUxtscGJQajyt3DVV9lre7RzOeqyFqM
   const b64uToBytes=x=>{x=x.replace(/-/g,'+').replace(/_/g,'/');while(x.length%4)x+='=';const b=atob(x);return Uint8Array.from(b,c=>c.charCodeAt(0));};
   const b64uToText=x=>new TextDecoder().decode(b64uToBytes(x));
   const pemToArrayBuffer=pem=>{const b64=pem.replace(/-----[^-]+-----/g,'').replace(/\s+/g,'');return Uint8Array.from(atob(b64),c=>c.charCodeAt(0)).buffer;};
+  const formatFecha=x=>{
+    const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(x||''));
+    if(!m)return String(x||'');
+    const d=new Date(Date.UTC(Number(m[1]),Number(m[2])-1,Number(m[3])));
+    const dias=['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+    return `${dias[d.getUTCDay()]} ${m[3]}/${m[2]}/${m[1]}`;
+  };
   function fail(msg){status.className='status bad';status.innerHTML='<div class="eyebrow">CONTROL DE ACCESO</div><h1>NO VÁLIDO</h1><p>'+esc(msg)+'</p>';body.innerHTML='<p>Esta credencial no habilita el ingreso.</p>';}
 
   if(!p||!s){fail('QR incompleto.');return;}
@@ -65,7 +72,7 @@ Ezt7tHHudHa87at49xvNXzCLu58OSxMH1hUxtscGJQajyt3DVV9lre7RzOeqyFqM
     const acts=String(t.a||'').split('|').map(x=>x.trim()).filter(Boolean);
     body.innerHTML='<div class="code">'+esc(t.c)+'</div>'+
       '<div class="grid"><div class="item"><b>Participantes</b>'+esc(t.p||1)+'</div><div class="item"><b>Estado</b>ABONADO</div></div>'+
-      '<h3>Días habilitados</h3>'+(fechas.length?'<ul>'+fechas.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>':'<p>Sin fechas registradas.</p>')+
+      '<h3>Días habilitados</h3>'+(fechas.length?'<ul>'+fechas.map(x=>'<li>'+esc(formatFecha(x))+'</li>').join('')+'</ul>':'<p>Sin fechas registradas.</p>')+
       '<h3>Talleres y capacitaciones registrados</h3>'+(acts.length?'<ul>'+acts.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>':'<p>No registra talleres o capacitaciones.</p>')+
       '<div class="note"><strong>Ingreso habilitado.</strong> Credencial firmada digitalmente. La validación funciona en el dispositivo y no depende de Google ni de la conexión con Administración.</div>';
   }catch(err){fail('No se pudo verificar la credencial.');}
