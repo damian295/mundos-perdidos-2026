@@ -7,37 +7,68 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>Control de acceso · Mundos Perdidos 2026</title>
-<script>
-(function(){
-  var p=new URLSearchParams(location.search);
-  var code=(p.get('c')||p.get('code')||'').trim();
-  var backend='https://script.google.com/macros/s/AKfycbzktEKSf2IhLeYb79s2uSBRWvo-cSBcRQq3lDi4bmGgVfK4WVNwpYg1QAho3PyS23XK/exec';
-  if(code){
-    location.replace(backend+'?action=validar_qr&code='+encodeURIComponent(code));
-  }
-})();
-</script>
 <style>
-body{margin:0;background:#f2e8d7;font-family:Arial,sans-serif;color:#2d2118;display:grid;place-items:center;min-height:100vh;padding:20px;box-sizing:border-box}.card{width:min(620px,92vw);background:#fffdf8;border-radius:20px;padding:24px;box-shadow:0 14px 40px #0002;text-align:center}h1{font-family:Georgia,serif;margin:0 0 12px}.code{font-family:monospace;background:#efe4d0;border-radius:999px;padding:8px 12px;display:inline-block}.btn{display:inline-block;margin-top:18px;background:#143f36;color:white;text-decoration:none;padding:13px 18px;border-radius:999px;font-weight:700}
+:root{--green:#15463b;--red:#a92e22;--amber:#b06b0c;--cream:#f2e8d7;--paper:#fffdf8;--ink:#2d2118}
+*{box-sizing:border-box}body{margin:0;background:var(--cream);font-family:Arial,sans-serif;color:var(--ink);min-height:100vh}.top{display:flex;gap:12px;align-items:center;padding:14px 18px;background:#fff9ef;border-bottom:1px solid #dfcfb6}.top img{width:105px;height:auto}.top strong{display:block;font-size:18px}.top small{display:block;color:#6b6258;font-size:14px;margin-top:2px}.wrap{max-width:720px;margin:0 auto;padding:20px}.card{background:var(--paper);border-radius:22px;overflow:hidden;box-shadow:0 15px 40px #0002}.status{padding:28px 20px;text-align:center;color:white}.status.ok{background:var(--green)}.status.bad{background:var(--red)}.status.warn{background:var(--amber)}.eyebrow{font-size:14px;font-weight:800;letter-spacing:.18em}.status h1{font-family:Georgia,serif;font-size:44px;margin:10px 0 6px}.status p{margin:0;font-weight:700;font-size:17px}.body{padding:22px}.code{display:inline-block;font-family:monospace;background:#efe4d0;border-radius:999px;padding:7px 11px;font-weight:700}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}.item{background:#faf6ef;border:1px solid #eadfce;border-radius:12px;padding:11px}.item b{display:block;font-size:12px;color:#6b6258;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}h3{margin:20px 0 8px;font-size:18px}ul{margin:8px 0 0;padding-left:22px}li{margin:6px 0}.note{margin-top:18px;padding:12px 14px;border-left:4px solid var(--green);background:#f4f8f6;border-radius:8px;font-size:14px}.small{font-size:12px;color:#766b60;margin-top:14px}@media(max-width:560px){.top img{width:95px}.top strong{font-size:16px}.status h1{font-size:39px}.grid{grid-template-columns:1fr}.wrap{padding:14px}}
 </style>
 </head>
 <body>
-<div class="card">
-  <h1>Control de acceso</h1>
-  <p id="msg">Abriendo validación…</p>
-  <div id="fallback"></div>
-</div>
+<header class="top"><img src="../assets/logo_museo.jpg" alt="Museo Scasso"><div><strong>Museo de Ciencias Naturales A. Scasso</strong><small>Control de acceso · Mundos Perdidos 2026</small></div></header>
+<main class="wrap"><section class="card"><div id="status" class="status warn"><div class="eyebrow">CONTROL DE ACCESO</div><h1>VERIFICANDO…</h1><p>Validando credencial</p></div><div id="body" class="body"></div></section></main>
 <script>
-(function(){
-  var p=new URLSearchParams(location.search);
-  var code=(p.get('c')||p.get('code')||'').trim();
-  var backend='https://script.google.com/macros/s/AKfycbzktEKSf2IhLeYb79s2uSBRWvo-cSBcRQq3lDi4bmGgVfK4WVNwpYg1QAho3PyS23XK/exec';
-  if(!code){
-    document.getElementById('msg').textContent='QR inválido: falta el código de reserva.';
-    return;
-  }
-  var target=backend+'?action=validar_qr&code='+encodeURIComponent(code);
-  document.getElementById('fallback').innerHTML='<div class="code">'+code.replace(/[&<>"']/g,'')+'</div><br><a class="btn" href="'+target+'">Abrir validación</a>';
+(async function(){
+  const PUBLIC_KEY=`-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvwbCDX54CHlSfvEl+xEN
+m0q2H6htvFfUvjXdB+aUuLxVvVI/UfCzHNHXHcTq+jTTtAYRgweWDqECa9rze2LI
+4Qf/1MeX90+nO3ySeuyBa5kaIV4etLBV9itoQMSo3m87/nYJXq0DtlrzWMtzatDJ
+9qkEecSGapzFtFzl5UTJkQ1xHm6KPc5SLPpfRXBUo8OWTEACyMM1/P1BXfRdRYhK
+jcN6BfHq8gV6N0j1152i6+hQavVfcZHlPgmAg2Gegq9v3sUK0BdNlq5VvK/+j0cz
+XNTMW/4IsDJY25Ukie7+3b5j4MsBB5A0gLjrgegO5I6XFiYVigTgzecOP5JwWvX7
+CQIDAQAB
+-----END PUBLIC KEY-----`;
+
+  // Compatibilidad sólo con el ticket de prueba ya emitido. Los tickets nuevos usarán p+s en el QR.
+  const LEGACY={
+    'MSC-MUND-20260912-W4UQ5':{
+      p:'eyJ2IjoxLCJjIjoiTVNDLU1VTkQtMjAyNjA5MTItVzRVUTUiLCJwIjoxLCJmIjpbIjIwMjYtMDktMjciLCIyMDI2LTA5LTI4IiwiMjAyNi0xMC0wMSJdLCJhIjoiVGFsbGVyIGRlIEZvdG9ncmFmw61hIGRlIE5hdHVyYWxlemEgwrcgTXVuZG9zIEVzY29uZGlkb3MgKDEgcGFydGljaXBhbnRlKHMpKXzCv0PDs21vIGFib3JkYXIgbGEgcHJvYmxlbcOhdGljYSBhbWJpZW50YWwgc2l0dWFkYT8gKDEgcGFydGljaXBhbnRlKHMpKXxQaW50dXJhIGRlbCByw61vICgxIHBhcnRpY2lwYW50ZShzKSkifQ',
+      s:'o_eT-iOwP91FHnM241SlpNcylNhML-2DQpboS3BIlfL36Mech8Q3GDBuSF3bC9UQArrpCEubdUkaNanDG018NE1J6DDAJGUjvLD0_nEhKDgwZ-iGvevT2zsnyxHNd_7BxOJtMLYPyf-Et0KBegSTD5AfNQUhlEB9r6ypzOUlfllEn4gh9iDqsL4Hk65YrP1HPaq6jA4HaBuQ--fOqq-EbcKRots8jpaQCqyCnK8FaS5BWrwAgQjhfK2BVaOpOYh55D3dI1nl217AKTeZBaF4bfVJ9g96US0JbXtE0JgcduEdum0Arh4glNSVDjql4AWsAeoCcW5TvLTACs1paCmu-w'
+    }
+  };
+
+  const qs=new URLSearchParams(location.search);
+  let p=qs.get('p')||'';
+  let s=qs.get('s')||'';
+  const legacyCode=(qs.get('c')||qs.get('code')||'').trim();
+  if((!p||!s)&&LEGACY[legacyCode]){p=LEGACY[legacyCode].p;s=LEGACY[legacyCode].s;}
+
+  const status=document.getElementById('status');
+  const body=document.getElementById('body');
+  const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  const b64uToBytes=x=>{x=x.replace(/-/g,'+').replace(/_/g,'/');while(x.length%4)x+='=';const b=atob(x);return Uint8Array.from(b,c=>c.charCodeAt(0));};
+  const b64uToText=x=>new TextDecoder().decode(b64uToBytes(x));
+  const pemToArrayBuffer=pem=>{const b64=pem.replace(/-----[^-]+-----/g,'').replace(/\s+/g,'');return Uint8Array.from(atob(b64),c=>c.charCodeAt(0)).buffer;};
+  function fail(msg){status.className='status bad';status.innerHTML='<div class="eyebrow">CONTROL DE ACCESO</div><h1>NO VÁLIDO</h1><p>'+esc(msg)+'</p>';body.innerHTML='<p>Esta credencial no habilita el ingreso.</p>';}
+
+  if(!p||!s){fail('QR incompleto.');return;}
+  if(!window.crypto||!crypto.subtle){fail('Este navegador no permite verificar la credencial.');return;}
+
+  try{
+    const key=await crypto.subtle.importKey('spki',pemToArrayBuffer(PUBLIC_KEY),{name:'RSASSA-PKCS1-v1_5',hash:'SHA-256'},false,['verify']);
+    const valid=await crypto.subtle.verify({name:'RSASSA-PKCS1-v1_5'},key,b64uToBytes(s),new TextEncoder().encode(p));
+    if(!valid){fail('Firma inválida.');return;}
+    const t=JSON.parse(b64uToText(p));
+    if(!t||t.v!==1||!t.c){fail('Credencial ilegible.');return;}
+
+    status.className='status ok';
+    status.innerHTML='<div class="eyebrow">CONTROL DE ACCESO</div><h1>ABONADO</h1><p>Pago confirmado · credencial válida</p>';
+    const fechas=Array.isArray(t.f)?t.f:[];
+    const acts=String(t.a||'').split('|').map(x=>x.trim()).filter(Boolean);
+    body.innerHTML='<div class="code">'+esc(t.c)+'</div>'+
+      '<div class="grid"><div class="item"><b>Participantes</b>'+esc(t.p||1)+'</div><div class="item"><b>Estado</b>ABONADO</div></div>'+
+      '<h3>Días habilitados</h3>'+(fechas.length?'<ul>'+fechas.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>':'<p>Sin fechas registradas.</p>')+
+      '<h3>Talleres y capacitaciones registrados</h3>'+(acts.length?'<ul>'+acts.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>':'<p>No registra talleres o capacitaciones.</p>')+
+      '<div class="note"><strong>Ingreso habilitado.</strong> Esta validación se realiza en el dispositivo y no depende de Google ni de la conexión con Administración.</div>';
+  }catch(err){fail('No se pudo verificar la credencial.');}
 })();
 </script>
 </body>
