@@ -29,6 +29,32 @@
 /* Ya es la versión operativa; nunca mostrar carteles internos de prueba */
 .test-banner{display:none!important}
 
+/* Resumen móvil: barra compacta durante la elección y resumen completo antes de confirmar */
+.mobile-selection-bar{display:none}
+
+@media(max-width:760px){
+  body{padding-bottom:76px}
+  .booking-layout{display:block!important}
+  .summary-card{order:initial!important;margin:28px 0 20px!important}
+  .summary-sticky{position:relative!important;top:auto!important;padding:18px!important;box-shadow:0 12px 32px rgba(49,34,22,.12)!important}
+
+  .mobile-selection-bar{display:block;position:fixed;left:10px;right:10px;bottom:10px;z-index:85;background:#fffaf2;border:1px solid #cdb99d;box-shadow:0 12px 34px rgba(28,24,18,.24);transform:translateY(calc(100% + 24px));opacity:0;pointer-events:none;transition:transform .2s ease,opacity .2s ease}
+  .mobile-selection-bar.active{transform:translateY(0);opacity:1;pointer-events:auto}
+  .mobile-selection-bar.summary-visible{transform:translateY(calc(100% + 24px));opacity:0;pointer-events:none}
+  .mobile-selection-toggle{width:100%;border:0;background:var(--deep);color:#fff;display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:10px;padding:10px 12px;text-align:left}
+  .mobile-selection-copy{min-width:0;display:block}
+  .mobile-selection-copy small{display:block;text-transform:uppercase;letter-spacing:.1em;font-size:.62rem;font-weight:800;color:#dbe9df;margin-bottom:1px}
+  .mobile-selection-copy strong{display:block;font-size:.86rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mobile-selection-total{font-size:1rem;color:#fff;white-space:nowrap}
+  .mobile-selection-action{font-size:.78rem;font-weight:850;color:#f3c67b;white-space:nowrap}
+  .mobile-selection-details{padding:11px 12px 12px;background:#fffaf2;color:#4f4439;font-size:.8rem;line-height:1.42;max-height:42vh;overflow:auto}
+  .mobile-selection-details>div{padding:5px 0;border-bottom:1px solid rgba(205,185,157,.45)}
+  .mobile-selection-details>div:last-child{border-bottom:0}
+  .mobile-selection-details span{display:block;text-transform:uppercase;letter-spacing:.08em;font-size:.65rem;font-weight:850;color:var(--muted);margin-bottom:2px}
+  .mobile-selection-details p{margin:0}
+  .mobile-selection-details strong{color:var(--deep)}
+}
+
 @media(max-width:640px){
   .best-badge{font-size:.74rem!important;padding:7px 11px!important;top:-12px!important}
   .weekend-card{border-top-width:2px}
