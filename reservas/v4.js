@@ -53,16 +53,16 @@ renderSummary=function(){
 
 renderAll();
 
-// v5 incorpora Peces en su tinta y materiales. v6 incorpora los precios y adicionales
-// acordados. La integración real se carga al final para tomar esos valores definitivos.
+// v5 incorpora Peces en su tinta y materiales. v6 incorpora los precios finales,
+// revisión consciente de actividades y condiciones. La integración real se carga al final.
 const v5Script=document.createElement('script');
 v5Script.src='v5.js?v=3';
 v5Script.onload=()=>{
   const v6Script=document.createElement('script');
-  v6Script.src='v6.js?v=1';
+  v6Script.src='v6.js?v=2';
   v6Script.onload=()=>{
     const liveScript=document.createElement('script');
-    liveScript.src='live-integration.js?v=8';
+    liveScript.src='live-integration.js?v=9';
     document.head.appendChild(liveScript);
   };
   document.head.appendChild(v6Script);
