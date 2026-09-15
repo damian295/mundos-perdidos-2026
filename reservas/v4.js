@@ -1,7 +1,7 @@
 'use strict';
 
-// Ajustes de la cuarta prueba. Las capacitaciones tienen una capacidad operativa
-// inicial prevista de 50 personas y puede ampliarse si la organización lo decide.
+// Capacitaciones docentes: se mantiene abierta la inscripción. El umbral de 50
+// sirve para una advertencia operativa, no como corte automático.
 ACTIVITIES.forEach(a=>{
   if(a.group==='teacher'||a.id.startsWith('docencia-')){
     a.capacityPlan=50;
@@ -11,9 +11,7 @@ ACTIVITIES.forEach(a=>{
 
 const quotaTextBeforeV4=quotaText;
 quotaText=function(a){
-  if(a.expandableCapacity){
-    return `${a.capacityPlan} lugares previstos inicialmente · capacidad ampliable`;
-  }
+  if(a.expandableCapacity)return 'Inscripción abierta';
   return quotaTextBeforeV4(a);
 };
 
@@ -33,9 +31,7 @@ renderDays=function(){
 const renderActivitiesBeforeV4=renderActivities;
 renderActivities=function(){
   renderActivitiesBeforeV4();
-  document.querySelectorAll('.teacher-group .activity-row').forEach(row=>{
-    row.classList.add('teacher-activity');
-  });
+  document.querySelectorAll('.teacher-group .activity-row').forEach(row=>row.classList.add('teacher-activity'));
 };
 
 const renderSummaryBeforeV4=renderSummary;
