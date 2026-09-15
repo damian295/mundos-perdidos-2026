@@ -1,8 +1,7 @@
 'use strict';
 (()=>{
-  // Usamos el backend estable de Reservas, que ya soporta action=status por iframe/postMessage.
-  // Evitamos abrir directamente el Web App de Apps Script, porque Google puede mostrar la pantalla
-  // de Drive "no se pudo abrir el archivo" en algunos navegadores/cuentas.
+  // El parámetro "c" está reservado por Google Apps Script y provoca HTTP 405.
+  // La página pública puede recibir ?c=..., pero al consultar Apps Script enviamos sólo "code".
   const BACKEND='https://script.google.com/macros/s/AKfycbzktEKSf2IhLeYb79s2uSBRWvo-cSBcRQq3lDi4bmGgVfK4WVNwpYg1QAho3PyS23XK/exec';
   const code=(new URLSearchParams(location.search).get('c')||'').trim();
   const statusBox=document.getElementById('status');
@@ -108,11 +107,11 @@
   iframe.className='qr-helper';
   iframe.style.display='none';
   iframe.src=BACKEND+'?'+new URLSearchParams({
-    action:'status',estado_reserva:'1',code:code,c:code,iframe:'1',callbackId
+    action:'status',code:code,iframe:'1',callbackId
   }).toString();
   document.body.appendChild(iframe);
 
-  // Respaldo JSONP de sólo lectura usando el mismo backend.
+  // Respaldo JSONP de sólo lectura. Importante: tampoco enviamos el parámetro reservado "c".
   const cb='__qrStatus_'+Math.random().toString(36).slice(2,10);
   window[cb]=result=>{
     try{delete window[cb];}catch(_){window[cb]=undefined;}
@@ -120,7 +119,7 @@
   };
   const script=document.createElement('script');
   script.className='qr-helper';
-  script.src=BACKEND+'?'+new URLSearchParams({action:'status',code:code,c:code,callback:cb}).toString();
+  script.src=BACKEND+'?'+new URLSearchParams({action:'status',code:code,callback:cb}).toString();
   document.head.appendChild(script);
 
   setTimeout(()=>{
