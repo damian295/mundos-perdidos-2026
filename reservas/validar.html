@@ -18,20 +18,20 @@
 <script>
 (async function(){
   const PUBLIC_KEY=`-----BEGIN PUBLIC KEY-----
-MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvwbCDX54CHlSfvEl+xEN
-m0q2H6htvFfUvjXdB+aUuLxVvVI/UfCzHNHXHcTq+jTTtAYRgweWDqECa9rze2LI
-4Qf/1MeX90+nO3ySeuyBa5kaIV4etLBV9itoQMSo3m87/nYJXq0DtlrzWMtzatDJ
-9qkEecSGapzFtFzl5UTJkQ1xHm6KPc5SLPpfRXBUo8OWTEACyMM1/P1BXfRdRYhK
-jcN6BfHq8gV6N0j1152i6+hQavVfcZHlPgmAg2Gegq9v3sUK0BdNlq5VvK/+j0cz
-XNTMW/4IsDJY25Ukie7+3b5j4MsBB5A0gLjrgegO5I6XFiYVigTgzecOP5JwWvX7
-CQIDAQAB
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA18Wg3Jo1t/Bzmztsk4xj
+OB1jhBh6SZbaEl3xFaR0irjwYGX1Pg/EUEIu0TsCqBZ1AvJ0tG9QH+ZU7o5skIYi
+74vzgLUUtEXfpeE201CK+ow59GdgWr8R2HSMnZJT/nKazUTIwy5bOyglV0BsQq3d
+LD2SOwwZoTaLS0f3/IIqdvwA/mF9Is4Hom+6RYNxg3MCk1L2OCor5WEkfxGoCUk8
+FRA2U7FETSFa1y7R0JWK2KcxH1zFAoshf+UFh+Mqvtyj1ZG8YgqeV7mHioU0owgn
+Ezt7tHHudHa87at49xvNXzCLu58OSxMH1hUxtscGJQajyt3DVV9lre7RzOeqyFqM
+0QIDAQAB
 -----END PUBLIC KEY-----`;
 
-  // Compatibilidad sólo con el ticket de prueba ya emitido. Los tickets nuevos usarán p+s en el QR.
+  // Compatibilidad con el ticket de prueba ya emitido. Los tickets nuevos usan p+s en el QR.
   const LEGACY={
     'MSC-MUND-20260912-W4UQ5':{
       p:'eyJ2IjoxLCJjIjoiTVNDLU1VTkQtMjAyNjA5MTItVzRVUTUiLCJwIjoxLCJmIjpbIjIwMjYtMDktMjciLCIyMDI2LTA5LTI4IiwiMjAyNi0xMC0wMSJdLCJhIjoiVGFsbGVyIGRlIEZvdG9ncmFmw61hIGRlIE5hdHVyYWxlemEgwrcgTXVuZG9zIEVzY29uZGlkb3MgKDEgcGFydGljaXBhbnRlKHMpKXzCv0PDs21vIGFib3JkYXIgbGEgcHJvYmxlbcOhdGljYSBhbWJpZW50YWwgc2l0dWFkYT8gKDEgcGFydGljaXBhbnRlKHMpKXxQaW50dXJhIGRlbCByw61vICgxIHBhcnRpY2lwYW50ZShzKSkifQ',
-      s:'o_eT-iOwP91FHnM241SlpNcylNhML-2DQpboS3BIlfL36Mech8Q3GDBuSF3bC9UQArrpCEubdUkaNanDG018NE1J6DDAJGUjvLD0_nEhKDgwZ-iGvevT2zsnyxHNd_7BxOJtMLYPyf-Et0KBegSTD5AfNQUhlEB9r6ypzOUlfllEn4gh9iDqsL4Hk65YrP1HPaq6jA4HaBuQ--fOqq-EbcKRots8jpaQCqyCnK8FaS5BWrwAgQjhfK2BVaOpOYh55D3dI1nl217AKTeZBaF4bfVJ9g96US0JbXtE0JgcduEdum0Arh4glNSVDjql4AWsAeoCcW5TvLTACs1paCmu-w'
+      s:'D90EfVYZUdXdy7rON1DVQJvr7v4xKgXhc-BL2tHhoJ48dblZpYFJUKwcd5RJPWf6Xs7Alh1fcVVnk8cHoea2Z_f8YKd7ycZzpd81kMKu26G-fCymng4nGG5Ih6uSADBzOxUvkGSNUFxDbR5em_ATVjr3x_xm0pZw_jGoRX8nQgSJ9No851nSCUalA_H9C-QRHytvlTYjx5PJJpp8BLKAOItA3mhtG8LqYb28DmGo0NMprxRwF4Q7gWAPjI7sf-WcvgFWuq4pZQuS8Yq0yBhqaLtRmrXXhyBBvoVYVHuX2I92yuF8WoxQtP4_XMAmHtleaAyfLbDLdXFdi1C9jAXWag'
     }
   };
 
@@ -67,7 +67,7 @@ CQIDAQAB
       '<div class="grid"><div class="item"><b>Participantes</b>'+esc(t.p||1)+'</div><div class="item"><b>Estado</b>ABONADO</div></div>'+
       '<h3>Días habilitados</h3>'+(fechas.length?'<ul>'+fechas.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>':'<p>Sin fechas registradas.</p>')+
       '<h3>Talleres y capacitaciones registrados</h3>'+(acts.length?'<ul>'+acts.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>':'<p>No registra talleres o capacitaciones.</p>')+
-      '<div class="note"><strong>Ingreso habilitado.</strong> Esta validación se realiza en el dispositivo y no depende de Google ni de la conexión con Administración.</div>';
+      '<div class="note"><strong>Ingreso habilitado.</strong> Credencial firmada digitalmente. La validación funciona en el dispositivo y no depende de Google ni de la conexión con Administración.</div>';
   }catch(err){fail('No se pudo verificar la credencial.');}
 })();
 </script>
