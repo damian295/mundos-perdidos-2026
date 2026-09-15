@@ -21,8 +21,80 @@
     return parts.length===3?`${parts[2]}/${parts[1]}`:String(d||'');
   };
 
+  // Fuente independiente de precios para impedir que un valor corrupto, cacheado o
+  // mal convertido llegue a Administración. Estos son los valores públicos vigentes.
+  const CANONICAL_PRICES={
+    weekday:{single:5000,group:15000},
+    weekend:{single:7000,group:20000},
+    full:{single:30000,group:80000}
+  };
+
+  function canonicalBundle(q,price){
+    q=Math.max(0,Math.floor(Number(q)||0));
+    if(!q)return 0;
+    const options=[
+      {size:1,cost:Number(price.single)},
+      {size:3,cost:Number(price.group)},
+      {size:4,cost:Number(price.group)}
+    ];
+    const dp=Array(q+1).fill(Infinity);dp[0]=0;
+    for(let i=1;i<=q;i++){
+      for(const o of options){
+        if(i>=o.size&&Number.isFinite(dp[i-o.size]))dp[i]=Math.min(dp[i],dp[i-o.size]+o.cost);
+      }
+    }
+    return dp[q];
+  }
+
+  function canonicalPrice(){
+    const dates=selectedDates();
+    const paid=Math.max(0,Math.floor(Number(state.paid)||0));
+    if(!dates.length||paid<1)return{entries:0,extras:0,total:0,base:0,saving:0};
+
+    let entries=0,base=0;
+    if(state.mode==='full'){
+      entries=canonicalBundle(paid,CANONICAL_PRICES.full);
+      base=paid*CANONICAL_PRICES.full.single;
+    }else{
+      dates.forEach(date=>{
+        const day=dayByDate(date);
+        const price=day&&day.kind==='weekend'?CANONICAL_PRICES.weekend:CANONICAL_PRICES.weekday;
+        entries+=canonicalBundle(paid,price);
+        base+=paid*price.single;
+      });
+      if(dates.length===DAYS.length){
+        entries=Math.min(entries,canonicalBundle(paid,CANONICAL_PRICES.full));
+      }
+    }
+
+    let extras=0;
+    ACTIVITIES.forEach(a=>{
+      if(!dates.includes(a.date))return;
+      const q=Math.max(0,Math.floor(Number(state.activityQty[a.id])||0));
+      extras+=q*Math.max(0,Number(a.fee)||0);
+    });
+
+    const total=Math.round(entries+extras);
+    return{entries:Math.round(entries),extras:Math.round(extras),total,base:Math.round(base),saving:Math.max(0,Math.round(base-entries))};
+  }
+
+  // El importe que ve el usuario y el que se envía salen de la misma cuenta canónica.
+  // Aunque alguna capa anterior devolviera por error "6" o "7" en vez de miles,
+  // esta última barrera lo corrige antes de mostrar o registrar la reserva.
+  const previousCalculatePrice=calculatePrice;
+  calculatePrice=function(){
+    let previous={};
+    try{previous=previousCalculatePrice()||{};}catch(_){previous={};}
+    const c=canonicalPrice();
+    return {...previous,base:c.base,saving:c.saving,total:c.total,canonicalEntries:c.entries,canonicalExtras:c.extras};
+  };
+
   function payload(){
-    const dates=selectedDates(),p=calculatePrice(),c=code();
+    const dates=selectedDates(),p=canonicalPrice(),c=code();
+    if(!dates.length)throw new Error('sin-fechas');
+    if(Number(state.paid||0)<1)throw new Error('sin-entradas');
+    if(!Number.isFinite(p.total)||p.total<5000)throw new Error('importe-invalido');
+
     const acts=ACTIVITIES.filter(a=>Number(state.activityQty[a.id]||0)>0&&dates.includes(a.date));
     const actText=acts.map(a=>{
       const q=Number(state.activityQty[a.id]||0);
@@ -35,7 +107,7 @@
       : dates.length===1
         ? shortDate(dates[0])
         : `${dates.length} días seleccionados`;
-    const total=Math.round(Number(p.total||0));
+    const total=p.total;
     const acceptedAt=new Date().toISOString();
     return {
       programa:'Mundos Perdidos 2026',
@@ -54,6 +126,8 @@
       acompanantes:0,
       grupos_necesarios:1,
       precio_estimado:`$${total}`,
+      precio_entradas:p.entries,
+      adicionales:p.extras,
       responsable:document.getElementById('responsible').value.trim(),
       telefono:document.getElementById('phone').value.trim(),
       email:document.getElementById('email').value.trim(),
@@ -64,7 +138,7 @@
       accesibilidad:document.getElementById('notes').value.trim(),
       comentarios:`Condiciones de participación aceptadas digitalmente: ${acceptedAt}. ${acts.length?'Actividades seleccionadas: '+acts.length+'.':'Continuó expresamente sin reservar actividades.'}`,
       condiciones_aceptadas:true,
-      condiciones_version:'MP-2026-v1',
+      condiciones_version:'MP-2026-v2',
       codigo_reserva:c,
       referencia_pago:ref(c),
       estado:'PENDIENTE DE CONFIRMACIÓN DE PAGO',
@@ -145,7 +219,7 @@
         cleanup();
         reject(new Error('status-error'));
       };
-      const qs=new URLSearchParams({action:'status',callback:cb,code:codeValue,c:codeValue,v:'mp-live-7'});
+      const qs=new URLSearchParams({action:'status',callback:cb,code:codeValue,c:codeValue,v:'mp-live-10'});
       script.src=BACKEND+'?'+qs.toString();
       document.body.appendChild(script);
     });
@@ -155,8 +229,6 @@
     let postDone=false,postResult=null,postError=null;
     sendPost(data).then(r=>{postDone=true;postResult=r;}).catch(err=>{postDone=true;postError=err;});
 
-    // Se envía una sola vez. Sólo esperamos unos segundos para evitar una espera larga
-    // y, sobre todo, un segundo envío accidental que pueda duplicar la reserva.
     await delay(1600);
 
     for(let attempt=0;attempt<2;attempt++){
@@ -200,7 +272,16 @@
     const err=validateForm();
     if(err){msg.textContent=err;msg.className='form-message error';return;}
 
-    const data=payload();
+    let data;
+    try{data=payload();}
+    catch(ex){
+      msg.textContent='Detectamos una inconsistencia en el importe. La reserva no fue enviada. Recargá la página y volvé a revisar la selección.';
+      msg.className='form-message error';
+      btn.disabled=false;
+      btn.textContent='Generar pre-reserva';
+      return;
+    }
+
     btn.disabled=true;
     btn.textContent='Enviando…';
     msg.textContent='Enviando tu pre-reserva…';
@@ -235,4 +316,9 @@
       btn.textContent='Solicitud enviada';
     }
   },true);
+
+  // Refrescar todos los resúmenes con el importe canónico ya protegido.
+  try{renderAll();}catch(_){ }
+  try{updateFinalReviewV6();}catch(_){ }
+  try{updateMobileSelectionV7();}catch(_){ }
 })();
