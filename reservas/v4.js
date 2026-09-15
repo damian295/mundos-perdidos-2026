@@ -53,13 +53,18 @@ renderSummary=function(){
 
 renderAll();
 
-// v5 incorpora Peces en su tinta y sus materiales. La integración con el backend
-// se carga únicamente después de v5 y sólo actúa si la URL lleva ?modo=prueba-real.
+// v5 incorpora Peces en su tinta y materiales. v6 incorpora los precios y adicionales
+// acordados. La integración real se carga al final para tomar esos valores definitivos.
 const v5Script=document.createElement('script');
-v5Script.src='v5.js?v=2';
+v5Script.src='v5.js?v=3';
 v5Script.onload=()=>{
-  const liveScript=document.createElement('script');
-  liveScript.src='live-integration.js?v=7';
-  document.head.appendChild(liveScript);
+  const v6Script=document.createElement('script');
+  v6Script.src='v6.js?v=1';
+  v6Script.onload=()=>{
+    const liveScript=document.createElement('script');
+    liveScript.src='live-integration.js?v=8';
+    document.head.appendChild(liveScript);
+  };
+  document.head.appendChild(v6Script);
 };
 document.head.appendChild(v5Script);
