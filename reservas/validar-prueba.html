@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Prueba QR · Mundos Perdidos 2026</title>
+<style>
+body{margin:0;background:#f2e8d7;font-family:Arial,sans-serif;color:#2d2118}main{max-width:720px;margin:0 auto;padding:22px}.card{background:#fffdf8;border-radius:22px;overflow:hidden;box-shadow:0 15px 40px #0002}.head{padding:26px;text-align:center;background:#163f37;color:white}.head h1{margin:8px 0;font-family:Georgia,serif;font-size:42px}.body{padding:22px}.row{padding:9px 0;border-bottom:1px solid #eadfce}.ok{background:#16754d}.warn{background:#b06b0c}.bad{background:#a92e22}.small{font-size:13px;color:#6a5a49}.code{font-family:monospace;background:#efe4d0;display:inline-block;padding:6px 10px;border-radius:999px;font-weight:700}ul{padding-left:22px}button{width:100%;padding:15px;border:0;border-radius:999px;background:#173f37;color:white;font-weight:800;font-size:16px}
+</style>
+</head>
+<body>
+<main><section class="card"><div id="head" class="head"><div>CONTROL DE ACCESO · PRUEBA</div><h1>CONSULTANDO…</h1><div>Comprobando reserva</div></div><div id="body" class="body"></div></section></main>
+<script>
+(function(){
+  const BACKEND='https://script.google.com/macros/s/AKfycbzktEKSf2IhLeYb79s2uSBRWvo-cSBcRQq3lDi4bmGgVfK4WVNwpYg1QAho3PyS23XK/exec';
+  const code=(new URLSearchParams(location.search).get('c')||'').trim();
+  const head=document.getElementById('head');
+  const body=document.getElementById('body');
+  const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  let finished=false;
+  function fail(msg){ if(finished)return; finished=true; head.className='head bad'; head.innerHTML='<div>CONTROL DE ACCESO</div><h1>ERROR</h1><div>'+esc(msg)+'</div>'; body.innerHTML='<button onclick="location.reload()">Volver a verificar</button>'; }
+  window.mpQrStatus=function(result){
+    if(finished)return; finished=true;
+    if(!result||result.ok===false||!result.registered){ fail((result&&result.message)||'Reserva no encontrada.'); return; }
+    const t=result.ticket||{}; const status=String(result.status||t.estado||'').toUpperCase(); const paid=status.includes('ABONADO');
+    head.className='head '+(paid?'ok':'bad');
+    head.innerHTML='<div>CONTROL DE ACCESO</div><h1>'+(paid?'ABONADO':'NO HABILITADO')+'</h1><div>'+(paid?'Pago confirmado':'Pago no confirmado')+'</div>';
+    const fechas=Array.isArray(t.fechas)?t.fechas:[];
+    const dias=fechas.map(f=>'<li><b>'+esc(f.fecha||'')+'</b> · '+esc(f.titulo||f.horario||'Entrada')+'</li>').join('');
+    const temas=String(t.temas||'').split(/\s*\|\s*|\n+/).filter(Boolean).map(x=>'<li>'+esc(x)+'</li>').join('');
+    body.innerHTML='<p class="code">'+esc(result.code||code)+'</p>'+
+      '<div class="row"><b>Responsable:</b> '+esc(t.responsable||'—')+'</div>'+
+      '<div class="row"><b>DNI:</b> '+esc(t.dni||t.institucion||'—')+'</div>'+
+      '<div class="row"><b>Participantes:</b> '+esc(t.participantes||'—')+'</div>'+
+      '<div class="row"><b>Estado:</b> '+esc(status||'—')+'</div>'+
+      '<h3>Días habilitados</h3>'+(dias?'<ul>'+dias+'</ul>':'<p>Sin fechas registradas.</p>')+
+      '<h3>Talleres y capacitaciones</h3>'+(temas?'<ul>'+temas+'</ul>':'<p>No hay talleres o capacitaciones registrados.</p>');
+  };
+  if(!code){ fail('Falta el código de reserva.'); return; }
+  const s=document.createElement('script');
+  s.src=BACKEND+'?'+new URLSearchParams({action:'status',code:code,callback:'mpQrStatus',v:String(Date.now())}).toString();
+  s.onerror=()=>fail('No se pudo cargar la respuesta de Administración.');
+  document.head.appendChild(s);
+  setTimeout(()=>fail('Administración no respondió en 15 segundos.'),15000);
+})();
+</script>
+</body>
+</html>
