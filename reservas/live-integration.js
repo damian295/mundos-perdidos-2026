@@ -24,7 +24,11 @@
   function payload(){
     const dates=selectedDates(),p=calculatePrice(),c=code();
     const acts=ACTIVITIES.filter(a=>Number(state.activityQty[a.id]||0)>0&&dates.includes(a.date));
-    const actText=acts.map(a=>`${a.title} (${Number(state.activityQty[a.id]||0)} participante(s))`).join(' | ');
+    const actText=acts.map(a=>{
+      const q=Number(state.activityQty[a.id]||0);
+      const fee=q*Number(a.fee||0);
+      return `${a.title} (${q} participante(s)${fee?`, adicional $${Math.round(fee).toLocaleString('es-AR')}`:''})`;
+    }).join(' | ');
     const dni=document.getElementById('dni').value.replace(/\D/g,'');
     const dateSummary=dates.length===DAYS.length
       ? '26/09–04/10 · Pase completo'
@@ -32,6 +36,7 @@
         ? shortDate(dates[0])
         : `${dates.length} días seleccionados`;
     const total=Math.round(Number(p.total||0));
+    const acceptedAt=new Date().toISOString();
     return {
       programa:'Mundos Perdidos 2026',
       programa_id:'mundos',
@@ -57,10 +62,13 @@
       ciudad:document.getElementById('city').value.trim(),
       temas:actText,
       accesibilidad:document.getElementById('notes').value.trim(),
+      comentarios:`Condiciones de participación aceptadas digitalmente: ${acceptedAt}. ${acts.length?'Actividades seleccionadas: '+acts.length+'.':'Continuó expresamente sin reservar actividades.'}`,
+      condiciones_aceptadas:true,
+      condiciones_version:'MP-2026-v1',
       codigo_reserva:c,
       referencia_pago:ref(c),
       estado:'PENDIENTE DE CONFIRMACIÓN DE PAGO',
-      timestamp:new Date().toISOString()
+      timestamp:acceptedAt
     };
   }
 
@@ -137,7 +145,7 @@
         cleanup();
         reject(new Error('status-error'));
       };
-      const qs=new URLSearchParams({action:'status',callback:cb,code:codeValue,c:codeValue,v:'mp-live-6'});
+      const qs=new URLSearchParams({action:'status',callback:cb,code:codeValue,c:codeValue,v:'mp-live-7'});
       script.src=BACKEND+'?'+qs.toString();
       document.body.appendChild(script);
     });
@@ -147,9 +155,8 @@
     let postDone=false,postResult=null,postError=null;
     sendPost(data).then(r=>{postDone=true;postResult=r;}).catch(err=>{postDone=true;postError=err;});
 
-    // La reserva se envía una sola vez. Sólo esperamos unos segundos para intentar
-    // confirmar el registro; si Administración tarda, evitamos mostrar un falso error
-    // o habilitar un segundo envío que pueda generar duplicados.
+    // Se envía una sola vez. Sólo esperamos unos segundos para evitar una espera larga
+    // y, sobre todo, un segundo envío accidental que pueda duplicar la reserva.
     await delay(1600);
 
     for(let attempt=0;attempt<2;attempt++){
@@ -175,8 +182,6 @@
       if(attempt===0)await delay(900);
     }
 
-    // Sin respuesta concluyente no repetimos el POST. La solicitud ya fue enviada
-    // y puede estar procesándose; devolvemos estado pendiente de confirmación visual.
     return {
       ok:true,
       code:data.codigo_reserva,
@@ -225,8 +230,6 @@
       msg.className='form-message success';
       btn.textContent='Pre-reserva registrada';
     }catch(ex){
-      // Una caída de la verificación del navegador no implica que el POST haya fallado.
-      // Para evitar duplicados, no habilitamos un segundo envío automáticamente.
       msg.textContent=`Solicitud enviada: ${data.codigo_reserva}. No vuelvas a enviarla. Revisá tu correo; si no llega en unos minutos, contactá al Museo.`;
       msg.className='form-message success';
       btn.textContent='Solicitud enviada';
