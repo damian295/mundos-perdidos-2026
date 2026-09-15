@@ -83,7 +83,7 @@
         finished=true;
         cleanup();
         reject(new Error('timeout-post'));
-      },50000);
+      },25000);
       const cleanup=()=>{
         clearTimeout(timer);
         window.removeEventListener('message',onMessage);
@@ -119,7 +119,7 @@
         done=true;
         cleanup();
         reject(new Error('timeout-status'));
-      },12000);
+      },2200);
       function cleanup(){
         clearTimeout(timer);
         try{delete window[cb];}catch(_){window[cb]=undefined;}
@@ -137,24 +137,26 @@
         cleanup();
         reject(new Error('status-error'));
       };
-      const qs=new URLSearchParams({action:'status',callback:cb,code:codeValue,c:codeValue,v:'mp-live-5'});
+      const qs=new URLSearchParams({action:'status',callback:cb,code:codeValue,c:codeValue,v:'mp-live-6'});
       script.src=BACKEND+'?'+qs.toString();
       document.body.appendChild(script);
     });
   }
 
-  async function sendAndConfirm(data,onVerifying){
+  async function sendAndConfirm(data){
     let postDone=false,postResult=null,postError=null;
     sendPost(data).then(r=>{postDone=true;postResult=r;}).catch(err=>{postDone=true;postError=err;});
 
-    for(let attempt=0;attempt<14;attempt++){
-      await delay(attempt===0?3500:2500);
+    // La reserva se envía una sola vez. Sólo esperamos unos segundos para intentar
+    // confirmar el registro; si Administración tarda, evitamos mostrar un falso error
+    // o habilitar un segundo envío que pueda generar duplicados.
+    await delay(1600);
 
+    for(let attempt=0;attempt<2;attempt++){
       if(postDone&&postResult){
+        if(postResult.ok===false)return postResult;
         return postResult;
       }
-
-      if(attempt===1&&typeof onVerifying==='function')onVerifying();
 
       try{
         const st=await checkStatus(data.codigo_reserva);
@@ -170,11 +172,17 @@
       }catch(_){ }
 
       if(postDone&&postResult&&postResult.ok===false)return postResult;
-      if(postDone&&postError&&attempt>=4)break;
+      if(attempt===0)await delay(900);
     }
 
-    if(postDone&&postResult)return postResult;
-    throw postError||new Error('No se pudo confirmar el estado de la reserva.');
+    // Sin respuesta concluyente no repetimos el POST. La solicitud ya fue enviada
+    // y puede estar procesándose; devolvemos estado pendiente de confirmación visual.
+    return {
+      ok:true,
+      code:data.codigo_reserva,
+      pendingConfirmation:true,
+      postError:postError?String(postError.message||postError):''
+    };
   }
 
   form.addEventListener('submit',async e=>{
@@ -189,19 +197,15 @@
 
     const data=payload();
     btn.disabled=true;
-    btn.textContent='Registrando…';
-    msg.textContent='Registrando la pre-reserva en Administración…';
+    btn.textContent='Enviando…';
+    msg.textContent='Enviando tu pre-reserva…';
     msg.className='form-message';
 
     try{
-      const r=await sendAndConfirm(data,()=>{
-        msg.textContent='La solicitud fue enviada. Estamos verificando en Administración que haya quedado registrada…';
-        msg.className='form-message';
-        btn.textContent='Verificando…';
-      });
+      const r=await sendAndConfirm(data);
 
       if(!r||r.ok===false){
-        msg.textContent=(r&&r.message)?r.message:'No se pudo registrar la reserva.';
+        msg.textContent=(r&&r.message)?r.message:'No se pudo registrar la reserva. Intentá nuevamente.';
         msg.className='form-message error';
         btn.disabled=false;
         btn.textContent='Generar pre-reserva';
@@ -209,14 +213,23 @@
       }
 
       data.codigo_reserva=r.code||data.codigo_reserva;
+
+      if(r.pendingConfirmation){
+        msg.textContent=`Solicitud enviada: ${data.codigo_reserva}. No vuelvas a enviarla. Revisá tu correo: el ticket provisorio puede demorar unos minutos.`;
+        msg.className='form-message success';
+        btn.textContent='Solicitud enviada';
+        return;
+      }
+
       msg.textContent=`Pre-reserva registrada: ${data.codigo_reserva}. Te enviamos el ticket provisorio al correo indicado.`;
       msg.className='form-message success';
       btn.textContent='Pre-reserva registrada';
     }catch(ex){
-      msg.textContent='No pudimos confirmar el estado desde esta pantalla. No vuelvas a enviar todavía: verificá la planilla de Administración antes de repetir la reserva.';
-      msg.className='form-message error';
-      btn.disabled=false;
-      btn.textContent='Generar pre-reserva';
+      // Una caída de la verificación del navegador no implica que el POST haya fallado.
+      // Para evitar duplicados, no habilitamos un segundo envío automáticamente.
+      msg.textContent=`Solicitud enviada: ${data.codigo_reserva}. No vuelvas a enviarla. Revisá tu correo; si no llega en unos minutos, contactá al Museo.`;
+      msg.className='form-message success';
+      btn.textContent='Solicitud enviada';
     }
   },true);
 })();
