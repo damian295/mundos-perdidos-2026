@@ -3,12 +3,42 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>Control de acceso · Mundos Perdidos 2026</title>
-<link rel="stylesheet" href="validar.css?v=1">
+<script>
+(function(){
+  var p=new URLSearchParams(location.search);
+  var code=(p.get('c')||p.get('code')||'').trim();
+  var backend='https://script.google.com/macros/s/AKfycbzktEKSf2IhLeYb79s2uSBRWvo-cSBcRQq3lDi4bmGgVfK4WVNwpYg1QAho3PyS23XK/exec';
+  if(code){
+    location.replace(backend+'?action=validar_qr&code='+encodeURIComponent(code));
+  }
+})();
+</script>
+<style>
+body{margin:0;background:#f2e8d7;font-family:Arial,sans-serif;color:#2d2118;display:grid;place-items:center;min-height:100vh;padding:20px;box-sizing:border-box}.card{width:min(620px,92vw);background:#fffdf8;border-radius:20px;padding:24px;box-shadow:0 14px 40px #0002;text-align:center}h1{font-family:Georgia,serif;margin:0 0 12px}.code{font-family:monospace;background:#efe4d0;border-radius:999px;padding:8px 12px;display:inline-block}.btn{display:inline-block;margin-top:18px;background:#143f36;color:white;text-decoration:none;padding:13px 18px;border-radius:999px;font-weight:700}
+</style>
 </head>
 <body>
-<header class="top"><img src="../assets/logo_museo.jpg" alt="Museo Scasso"><div><strong>Museo de Ciencias Naturales A. Scasso</strong><small>Control de acceso · Mundos Perdidos 2026</small></div></header>
-<main class="wrap"><section class="card"><div id="status" class="status loading"><div class="eyebrow">Verificando reserva</div><h1>CONSULTANDO…</h1><p>Comprobando el estado en Administración</p></div><div id="body" class="body"></div></section></main>
-<script src="validar.js?v=7"></script>
+<div class="card">
+  <h1>Control de acceso</h1>
+  <p id="msg">Abriendo validación…</p>
+  <div id="fallback"></div>
+</div>
+<script>
+(function(){
+  var p=new URLSearchParams(location.search);
+  var code=(p.get('c')||p.get('code')||'').trim();
+  var backend='https://script.google.com/macros/s/AKfycbzktEKSf2IhLeYb79s2uSBRWvo-cSBcRQq3lDi4bmGgVfK4WVNwpYg1QAho3PyS23XK/exec';
+  if(!code){
+    document.getElementById('msg').textContent='QR inválido: falta el código de reserva.';
+    return;
+  }
+  var target=backend+'?action=validar_qr&code='+encodeURIComponent(code);
+  document.getElementById('fallback').innerHTML='<div class="code">'+code.replace(/[&<>"']/g,'')+'</div><br><a class="btn" href="'+target+'">Abrir validación</a>';
+})();
+</script>
 </body>
 </html>
