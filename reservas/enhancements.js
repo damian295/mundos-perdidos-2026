@@ -1,6 +1,6 @@
 'use strict';
 
-const PAINTING_MATERIAL_FEE_V3=25000;
+const PAINTING_MATERIAL_FEE_V3=30000;
 const paintingActivity=ACTIVITIES.find(a=>a.id==='pintura-01');
 if(paintingActivity)paintingActivity.fee=PAINTING_MATERIAL_FEE_V3;
 ACTIVITIES.forEach(a=>{
