@@ -1,0 +1,1 @@
+Subir aquí los archivos de la carpeta web_optimizadas del paquete Mundos Perdidos 2026. No cambiar los nombres de archivo. La página index-redesign.html los toma desde esta carpeta.
