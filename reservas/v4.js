@@ -64,21 +64,26 @@ v5Script.onload=()=>{
     const v7Script=document.createElement('script');
     v7Script.src='v7.js?v=2';
     v7Script.onload=()=>{
-      const liveScript=document.createElement('script');
-      liveScript.src='live-integration.js?v=10';
-      liveScript.onload=()=>{
-        document.getElementById('testBanner')?.remove();
-        const cleanUrl=new URL(location.href);
-        cleanUrl.searchParams.delete('modo');
-        history.replaceState(null,'',cleanUrl.pathname+(cleanUrl.search?cleanUrl.search:'')+cleanUrl.hash);
-        const submit=document.getElementById('submitBtn');
-        if(submit&&submit.dataset.awaitingProduction==='1'){
-          submit.disabled=false;
-          submit.textContent='Generar pre-reserva';
-          delete submit.dataset.awaitingProduction;
-        }
+      const v8Script=document.createElement('script');
+      v8Script.src='v8.js?v=1';
+      v8Script.onload=()=>{
+        const liveScript=document.createElement('script');
+        liveScript.src='live-integration.js?v=10';
+        liveScript.onload=()=>{
+          document.getElementById('testBanner')?.remove();
+          const cleanUrl=new URL(location.href);
+          cleanUrl.searchParams.delete('modo');
+          history.replaceState(null,'',cleanUrl.pathname+(cleanUrl.search?cleanUrl.search:'')+cleanUrl.hash);
+          const submit=document.getElementById('submitBtn');
+          if(submit&&submit.dataset.awaitingProduction==='1'){
+            submit.disabled=false;
+            submit.textContent='Generar pre-reserva';
+            delete submit.dataset.awaitingProduction;
+          }
+        };
+        document.head.appendChild(liveScript);
       };
-      document.head.appendChild(liveScript);
+      document.head.appendChild(v8Script);
     };
     document.head.appendChild(v7Script);
   };
