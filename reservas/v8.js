@@ -22,6 +22,14 @@ ACTIVITIES.filter(a=>a.title==='Peces en su tinta').forEach(a=>{
   a.type='Taller de arte · Lucila Andino';
 });
 
+// Pintura del río: cupo definitivo 10 participantes.
+const pinturaV8=ACTIVITIES.find(a=>a.id==='pintura-01');
+if(pinturaV8){
+  pinturaV8.capacity=10;
+  pinturaV8.remaining=10;
+  pinturaV8.limited=true;
+}
+
 // Dibujo al natural en el Museo: sábado 3, turno mañana, adultos, cupo 12.
 if(!ACTIVITIES.some(a=>a.id==='dibujo-natural-03')){
   ACTIVITIES.push({
