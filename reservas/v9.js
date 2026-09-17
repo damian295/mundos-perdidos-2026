@@ -53,14 +53,14 @@ if(helpV9){
   helpV9.innerHTML='La entrada cubre las actividades generales del día. Los <strong>talleres para infancias</strong> tienen un adicional de <strong>$5.000 por participante</strong>, salvo que se indique otro importe. Las capacitaciones docentes son gratuitas. Los talleres infantiles se realizan dentro del Museo y sus colecciones y son exclusivamente para niñas y niños inscriptos: al reservar, indicá sólo la cantidad de niñas/niños que participarán. Los adultos acompañantes realizan la acreditación y esperan fuera del espacio del taller durante la actividad.';
 }
 
-// Aclaración compacta para evitar que un docente inscripto por CIIE compre una entrada que no necesita.
+// Aclaración general para las capacitaciones docentes articuladas con CIIE.
 if(!document.getElementById('ciieAccessNoteV9')){
   const daysGridV9=document.getElementById('daysGrid');
   if(daysGridV9){
     const note=document.createElement('div');
     note.id='ciieAccessNoteV9';
     note.className='ciie-access-note-v9';
-    note.innerHTML='<strong>Capacitación docente CIIE · acceso sin cargo.</strong> Los docentes inscriptos previamente por CIIE para la capacitación del sábado 3 ingresan sin cargo ese día. Si no estás inscripto por CIIE, podés adquirir la entrada general del sábado y participar de las actividades de la jornada según disponibilidad. La entrada general no reemplaza la inscripción oficial del CIIE.';
+    note.innerHTML='<strong>Capacitaciones docentes CIIE · acceso sin cargo.</strong> Los docentes inscriptos previamente por CIIE en una capacitación de las Jornadas ingresan sin cargo durante el día de esa actividad. Las fechas y modalidades de inscripción se informarán a medida que queden confirmadas. Si no estás inscripto por CIIE, podés adquirir la entrada general del día correspondiente y participar de las actividades de la jornada según disponibilidad. La entrada general no reemplaza la inscripción oficial del CIIE.';
     const programNote=document.getElementById('programChangeNoteV8');
     if(programNote)programNote.insertAdjacentElement('afterend',note);
     else daysGridV9.insertAdjacentElement('afterend',note);
