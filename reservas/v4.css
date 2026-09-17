@@ -13,6 +13,14 @@
 .form-grid label{font-weight:500!important;color:#44382f!important}
 .form-grid label small{font-weight:400!important}
 .form-grid input,.form-grid textarea{font-weight:400!important}
+.help-text{font-size:.86rem!important;line-height:1.45!important;font-weight:400!important}
+.help-text strong{font-weight:700!important}
+
+/* En PC el resumen acompaña el scroll sin tapar el contenido. */
+@media(min-width:981px){
+  .summary-card{position:sticky!important;top:86px!important;align-self:start!important}
+  .summary-sticky{position:relative!important;top:auto!important;max-height:calc(100vh - 105px);overflow:auto}
+}
 
 /* Menores de 3: dato secundario, deliberadamente más compacto */
 .minor-inline{max-width:330px!important;margin-left:auto!important;margin-top:5px!important;padding-top:5px!important;gap:7px!important;font-size:.74rem!important;opacity:.92}
@@ -35,8 +43,8 @@
 @media(max-width:760px){
   body{padding-bottom:76px}
   .booking-layout{display:block!important}
-  .summary-card{order:initial!important;margin:28px 0 20px!important}
-  .summary-sticky{position:relative!important;top:auto!important;padding:18px!important;box-shadow:0 12px 32px rgba(49,34,22,.12)!important}
+  .summary-card{order:initial!important;margin:28px 0 20px!important;position:relative!important;top:auto!important}
+  .summary-sticky{position:relative!important;top:auto!important;max-height:none!important;overflow:visible!important;padding:18px!important;box-shadow:0 12px 32px rgba(49,34,22,.12)!important}
 
   .mobile-selection-bar{display:block;position:fixed;left:10px;right:10px;bottom:10px;z-index:85;background:#fffaf2;border:1px solid #cdb99d;box-shadow:0 12px 34px rgba(28,24,18,.24);transform:translateY(calc(100% + 24px));opacity:0;pointer-events:none;transition:transform .2s ease,opacity .2s ease}
   .mobile-selection-bar.active{transform:translateY(0);opacity:1;pointer-events:auto}
@@ -59,4 +67,5 @@
   .best-badge{font-size:.74rem!important;padding:7px 11px!important;top:-12px!important}
   .weekend-card{border-top-width:2px}
   .minor-inline{max-width:100%!important;margin-left:0!important}
+  .help-text{font-size:.82rem!important}
 }
