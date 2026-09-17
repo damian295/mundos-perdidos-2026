@@ -62,11 +62,15 @@ if(evangelinaV8){
 // Cambios generales del programa que no requieren reserva propia.
 const juevesV8=DAYS.find(d=>d.date==='2026-10-01');
 if(juevesV8){
-  juevesV8.highlights='Peces en su tinta · Pintura del río · Arqueólogos por un día · Conversatorio Marcos Sola y Cristian Giovanelli (18:00) · Epistemología de la Ciencia · Marcos Sola (19:00)';
+  juevesV8.highlights='Peces en su tinta · Pintura del río · Arqueólogos por un día · Conversatorio · Epistemología de la Ciencia';
+}
+const viernesV8=DAYS.find(d=>d.date==='2026-10-02');
+if(viernesV8){
+  viernesV8.highlights='Capacitación docente · Mito del Carpincho Blanco · Taller para infancias · Serpientes del Paraná · Música';
 }
 const sabadoV8=DAYS.find(d=>d.date==='2026-10-03');
 if(sabadoV8){
-  sabadoV8.highlights='El territorio como aula · Dibujo al natural en el Museo · Serpientes del Paraná · Aguará Guazú · El origen del mundo';
+  sabadoV8.highlights='El territorio como aula · Dibujo al natural en el Museo · Aguará Guazú · El origen del mundo';
 }
 
 // Respetar el cierre del 30/09 sin tocar el circuito de registro.
