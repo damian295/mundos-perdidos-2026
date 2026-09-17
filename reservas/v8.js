@@ -22,12 +22,13 @@ ACTIVITIES.filter(a=>a.title==='Peces en su tinta').forEach(a=>{
   a.type='Taller de arte · Lucila Andino';
 });
 
-// Pintura del río: cupo definitivo 10 participantes.
+// Pintura del río: cupo definitivo 10 participantes y materiales $30.000 por participante.
 const pinturaV8=ACTIVITIES.find(a=>a.id==='pintura-01');
 if(pinturaV8){
   pinturaV8.capacity=10;
   pinturaV8.remaining=10;
   pinturaV8.limited=true;
+  pinturaV8.fee=30000;
 }
 
 // Dibujo al natural en el Museo: sábado 3, turno mañana, adultos, cupo 12.
@@ -117,7 +118,17 @@ if(!document.getElementById('mpV8Styles')){
   style.textContent=`
     .program-change-note-v8{margin:10px 0 0;color:var(--muted);font-size:.78rem;line-height:1.35;font-weight:500}
     .activity-meta .quota{line-height:1.25}
-    @media(max-width:640px){.program-change-note-v8{font-size:.74rem;margin-top:8px}}
+
+    /* Dar prioridad visual al pase completo sin cambiar la selección por defecto. */
+    .mode-grid .best-mode{order:-1;background:linear-gradient(135deg,#fff8f5,#fff0eb);border-color:rgba(161,62,45,.42);box-shadow:0 8px 20px rgba(161,62,45,.08)}
+    .mode-grid .best-mode:hover{border-color:rgba(161,62,45,.68)}
+    .mode-grid .best-mode.active{background:linear-gradient(135deg,#fff4f0,#fbe8e2);border-color:#a13e2d;box-shadow:0 0 0 3px rgba(161,62,45,.10)}
+    .mode-grid .best-mode .best-badge{top:10px!important;right:10px!important;background:#a85a47;color:#fff;border-color:#a85a47;box-shadow:0 5px 12px rgba(120,55,42,.16)!important;animation:none}
+
+    @media(max-width:640px){
+      .program-change-note-v8{font-size:.74rem;margin-top:8px}
+      .mode-grid .best-mode .best-badge{top:9px!important;right:9px!important}
+    }
   `;
   document.head.appendChild(style);
 }
