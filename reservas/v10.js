@@ -1,86 +1,81 @@
 'use strict';
 
 // Ajuste visual y operativo del 17/09/2026.
-// El bloque de personas se compacta y los menores de 3 años dejan de registrarse.
+// Los menores de 3 años no se registran. Se elimina la caja visual grande de personas.
 try{state.free=0;}catch(_){ }
 
 const peoplePanelV10=document.querySelector('.people-panel');
 if(peoplePanelV10){
-  peoplePanelV10.classList.add('people-panel-compact-v10');
-  const minorInlineV10=peoplePanelV10.querySelector('.minor-inline');
-  if(minorInlineV10){
-    minorInlineV10.innerHTML='<span class="minor-free-only-v10"><strong>Menores de 3 años gratis</strong><output id="freePeople" hidden>0</output></span>';
+  peoplePanelV10.classList.add('people-panel-minimal-v10');
+
+  // Eliminar por completo el antiguo bloque de menores y su contador.
+  peoplePanelV10.querySelector('.minor-inline')?.remove();
+
+  // Dejar sólo una nota pequeña, fuera del control principal.
+  let minorNote=document.getElementById('minorGeneralNoteV10');
+  if(!minorNote){
+    minorNote=document.createElement('p');
+    minorNote.id='minorGeneralNoteV10';
+    minorNote.className='minor-general-note-v10';
+    minorNote.textContent='Menores de 3 años no pagan entrada general.';
+    peoplePanelV10.insertAdjacentElement('afterend',minorNote);
   }
 }
 
-// Ya no tiene sentido mostrar un contador en el resumen si los menores no se registran.
+// Ya no tiene sentido mostrar menores en el resumen.
 document.querySelector('.summary-row-minor')?.classList.add('hidden');
 
-if(!document.getElementById('peopleCompactStyleV10')){
+if(!document.getElementById('peopleMinimalStyleV10')){
   const style=document.createElement('style');
-  style.id='peopleCompactStyleV10';
+  style.id='peopleMinimalStyleV10';
   style.textContent=`
-    .people-panel.people-panel-compact-v10{
+    /* Sin caja: sólo el control necesario para indicar cantidad de entradas. */
+    .people-panel.people-panel-minimal-v10{
       min-height:0!important;
-      margin-top:12px!important;
-      padding:8px 12px!important;
-      display:flex!important;
-      align-items:center!important;
-      justify-content:space-between!important;
-      gap:10px!important;
-    }
-    .people-panel-compact-v10 .people-primary{
-      display:flex!important;
-      align-items:center!important;
-      justify-content:space-between!important;
-      gap:12px!important;
-      flex:1 1 auto!important;
-      min-width:0!important;
-    }
-    .people-panel-compact-v10 .people-primary label{
-      margin:0!important;
-      font-size:.88rem!important;
-      line-height:1.1!important;
-    }
-    .people-panel-compact-v10 .counter{
-      grid-template-columns:28px 34px 28px!important;
-      gap:0!important;
-    }
-    .people-panel-compact-v10 .counter button{
-      height:30px!important;
-      min-height:30px!important;
-      padding:0!important;
-      font-size:.92rem!important;
-    }
-    .people-panel-compact-v10 .counter output{
-      min-height:30px!important;
-      display:grid!important;
-      place-items:center!important;
-      font-size:.9rem!important;
-    }
-    .people-panel-compact-v10 .minor-inline{
-      max-width:none!important;
-      margin:0!important;
+      margin:10px 0 0!important;
       padding:0!important;
       border:0!important;
-      opacity:1!important;
+      background:transparent!important;
+      box-shadow:none!important;
       display:block!important;
-      white-space:nowrap!important;
-      font-size:.72rem!important;
-      line-height:1.1!important;
     }
-    .people-panel-compact-v10 .minor-inline strong{
-      font-size:.72rem!important;
+    .people-panel-minimal-v10 .people-primary{
+      display:flex!important;
+      align-items:center!important;
+      justify-content:flex-end!important;
+      gap:10px!important;
+      min-width:0!important;
+    }
+    .people-panel-minimal-v10 .people-primary label{
+      margin:0!important;
+      font-size:.78rem!important;
+      line-height:1!important;
       font-weight:650!important;
       color:var(--muted)!important;
     }
+    .people-panel-minimal-v10 .counter{
+      grid-template-columns:26px 32px 26px!important;
+      gap:0!important;
+    }
+    .people-panel-minimal-v10 .counter button,
+    .people-panel-minimal-v10 .counter output{
+      height:28px!important;
+      min-height:28px!important;
+      padding:0!important;
+      font-size:.84rem!important;
+    }
+    .minor-general-note-v10{
+      margin:3px 0 8px!important;
+      text-align:right!important;
+      color:var(--muted)!important;
+      font-size:.67rem!important;
+      line-height:1.2!important;
+      font-weight:500!important;
+    }
     @media(max-width:640px){
-      .people-panel.people-panel-compact-v10{padding:7px 9px!important;gap:7px!important}
-      .people-panel-compact-v10 .people-primary{gap:7px!important}
-      .people-panel-compact-v10 .people-primary label{font-size:.8rem!important}
-      .people-panel-compact-v10 .minor-inline strong{font-size:.66rem!important}
-      .people-panel-compact-v10 .counter{grid-template-columns:26px 30px 26px!important}
-      .people-panel-compact-v10 .counter button,.people-panel-compact-v10 .counter output{height:28px!important;min-height:28px!important}
+      .people-panel-minimal-v10 .people-primary{gap:7px!important}
+      .people-panel-minimal-v10 .people-primary label{font-size:.74rem!important}
+      .minor-general-note-v10{font-size:.64rem!important;margin-bottom:7px!important}
     }
   `;
   document.head.appendChild(style);
