@@ -71,7 +71,7 @@ v5Script.onload=()=>{
         v9Script.src='v9.js?v=5';
         v9Script.onload=()=>{
           const v10Script=document.createElement('script');
-          v10Script.src='v10.js?v=1';
+          v10Script.src='v10.js?v=2';
           v10Script.onload=()=>{
             const liveScript=document.createElement('script');
             liveScript.src='live-integration.js?v=10';
