@@ -4,15 +4,19 @@
 // No modifica backend, planilla, pagos ni QR.
 const DRAWING_FEE_V9=20000;
 
-// Sólo las actividades docentes articuladas oficialmente con un CIIE son sin cargo.
-// Las demás capacitaciones mantienen el adicional definido en la capa anterior.
+function isTeacherActivityV9(a){
+  return Boolean(a&&(a.group==='teacher'||String(a.id||'').startsWith('docencia-')));
+}
 function isCIIEActivityV9(a){
   return Boolean(a&&(a.ciie===true||/\bCIIE\b/i.test(String(a.type||''))));
 }
-const CIIE_TEACHER_FEE_V9=(typeof STANDARD_ACTIVITY_FEE_V6==='number'?STANDARD_ACTIVITY_FEE_V6:5000);
+
+// Regla definitiva:
+// - ninguna capacitación docente tiene adicional;
+// - las capacitaciones comunes requieren reserva y entrada del día;
+// - las actividades articuladas oficialmente con CIIE son sin cargo y su inscripción oficial incluye el acceso del día.
 ACTIVITIES.forEach(a=>{
-  const isTeacher=a.group==='teacher'||a.id.startsWith('docencia-');
-  if(isTeacher&&isCIIEActivityV9(a)){
+  if(isTeacherActivityV9(a)){
     a.fee=0;
     a.feeKind='gratis';
   }
@@ -38,46 +42,37 @@ if(drawingV9){
   drawingV9.type='Taller para adultos · Prof. Lucila Andino';
 }
 
-// Corregir la capa de cálculo anterior: elimina el adicional sólo para actividades CIIE
-// y conserva el adicional de las demás capacitaciones docentes.
+// La capa v6 agregaba $5.000 por capacitación docente. Se elimina por completo ese adicional.
 const calculatePriceBeforeV9=calculatePrice;
 calculatePrice=function(){
   const p=calculatePriceBeforeV9();
-  const ciieTeacherFees=ACTIVITIES.reduce((sum,a)=>{
-    const isTeacher=a.group==='teacher'||a.id.startsWith('docencia-');
-    if(!isTeacher||!isCIIEActivityV9(a))return sum;
-    return sum+(Number(state.activityQty[a.id]||0)*CIIE_TEACHER_FEE_V9);
-  },0);
+  const teacherFees=Math.max(0,Number(p.teacherFees||0));
   const drawingFees=Number(state.activityQty['dibujo-natural-03']||0)*DRAWING_FEE_V9;
   return {
     ...p,
-    teacherFees:Math.max(0,Number(p.teacherFees||0)-ciieTeacherFees),
+    teacherFees:0,
     drawingFees,
-    activityFees:Math.max(0,Number(p.activityFees||0)-ciieTeacherFees),
-    total:Math.max(0,Number(p.total||0)-ciieTeacherFees+drawingFees)
+    activityFees:Math.max(0,Number(p.activityFees||0)-teacherFees),
+    total:Math.max(0,Number(p.total||0)-teacherFees+drawingFees)
   };
 };
 
 // Texto operativo visible junto a talleres y capacitaciones.
 const helpV9=document.querySelector('#activitiesSection .help-text');
 if(helpV9){
-  helpV9.innerHTML='La entrada cubre las actividades generales del día. Los <strong>talleres para infancias</strong> tienen un adicional de <strong>$5.000 por participante</strong>, salvo que se indique otro importe. Las <strong>actividades docentes articuladas oficialmente con un CIIE son sin cargo</strong>; las demás capacitaciones mantienen el valor indicado en cada actividad. Los talleres infantiles se realizan dentro del Museo y sus colecciones y son exclusivamente para niñas y niños inscriptos: al reservar, indicá sólo la cantidad de niñas/niños que participarán. Los adultos acompañantes realizan la acreditación y esperan fuera del espacio del taller durante la actividad.';
+  helpV9.innerHTML='La entrada cubre las actividades generales del día. Los <strong>talleres para infancias</strong> tienen un adicional de <strong>$5.000 por participante</strong>, salvo que se indique otro importe. Las <strong>capacitaciones docentes no tienen costo adicional</strong>: requieren inscripción previa y se accede con la entrada del día. Las <strong>actividades articuladas oficialmente con un CIIE son sin cargo</strong> y su inscripción oficial incluye el acceso a las Jornadas durante esa fecha. Los talleres infantiles se realizan dentro del Museo y sus colecciones y son exclusivamente para niñas y niños inscriptos: al reservar, indicá sólo la cantidad de niñas/niños que participarán. Los adultos acompañantes realizan la acreditación y esperan fuera del espacio del taller durante la actividad.';
 }
 
-// Aviso CIIE: debe verse antes de elegir/comprar la entrada, no perdido al final.
+// Aviso CIIE: visible, pero después del bloque "Personas con entrada".
 let ciieNoteV9=document.getElementById('ciieAccessNoteV9');
 if(!ciieNoteV9){
   ciieNoteV9=document.createElement('div');
   ciieNoteV9.id='ciieAccessNoteV9';
   ciieNoteV9.className='ciie-access-note-v9';
 }
-ciieNoteV9.innerHTML='<div class="ciie-access-icon-v9" aria-hidden="true">🎓</div><div><strong>Actividades CIIE · sin cargo</strong><p>Si estás inscripto/a oficialmente por un CIIE en una actividad de las Jornadas, <b>no necesitás comprar entrada general para esa fecha</b>: la inscripción incluye el acceso a las Jornadas durante ese día.</p><small>Las demás capacitaciones se reservan y abonan según lo indicado en cada actividad.</small></div>';
-const modeGridV9=document.querySelector('.mode-grid');
-if(modeGridV9&&ciieNoteV9.parentElement!==modeGridV9.parentElement){
-  modeGridV9.insertAdjacentElement('beforebegin',ciieNoteV9);
-}else if(modeGridV9&&ciieNoteV9.nextElementSibling!==modeGridV9){
-  modeGridV9.insertAdjacentElement('beforebegin',ciieNoteV9);
-}
+ciieNoteV9.innerHTML='<div class="ciie-access-icon-v9" aria-hidden="true">🎓</div><div><strong>Actividades CIIE · sin cargo</strong><p>Si estás inscripto/a oficialmente por un CIIE en una actividad de las Jornadas, <b>no necesitás comprar entrada general para esa fecha</b>: la inscripción incluye el acceso a las Jornadas durante ese día.</p><small>Las demás capacitaciones docentes requieren reserva previa y se realizan con la entrada del día, sin costo adicional.</small></div>';
+const peoplePanelV9=document.querySelector('.people-panel');
+if(peoplePanelV9)peoplePanelV9.insertAdjacentElement('afterend',ciieNoteV9);
 
 if(!document.getElementById('ciieAccessStyleV9')){
   const style=document.createElement('style');
@@ -92,27 +87,40 @@ if(!document.getElementById('ciieAccessStyleV9')){
   document.head.appendChild(style);
 }
 
-// Actualizar la referencia de valores sin tocar la estructura de la página.
-const priceRowsV9=[...document.querySelectorAll('.price-reference details > div')];
-const teacherRowV9=priceRowsV9.find(row=>row.querySelector('span')?.textContent.trim()==='Capacitación docente'||row.querySelector('span')?.textContent.trim()==='Actividad docente CIIE');
-if(teacherRowV9){
-  const label=teacherRowV9.querySelector('span');
-  const b=teacherRowV9.querySelector('b');
-  const small=teacherRowV9.querySelector('small');
-  if(label)label.textContent='Actividad docente CIIE';
-  if(b)b.textContent='Sin cargo';
-  if(small)small.textContent='inscripción oficial · acceso del día incluido';
-}
+// Referencia de valores: distinguir capacitación común de actividad CIIE.
 const refV9=document.querySelector('.price-reference details');
-if(refV9&&!priceRowsV9.some(row=>row.querySelector('span')?.textContent.trim()==='Otras capacitaciones docentes')){
-  const row=document.createElement('div');
-  row.innerHTML='<span>Otras capacitaciones docentes</span><b>+$5.000</b><small>por participante, salvo indicación</small>';
-  if(teacherRowV9)teacherRowV9.insertAdjacentElement('afterend',row);else refV9.appendChild(row);
-}
-if(refV9&&!priceRowsV9.some(row=>row.querySelector('span')?.textContent.trim()==='Dibujo al natural en el Museo')){
-  const row=document.createElement('div');
-  row.innerHTML='<span>Dibujo al natural en el Museo · Prof. Lucila Andino</span><b>+$20.000</b><small>por participante</small>';
-  if(teacherRowV9)teacherRowV9.insertAdjacentElement('afterend',row);else refV9.appendChild(row);
+if(refV9){
+  [...refV9.querySelectorAll(':scope > div')].forEach(row=>{
+    const label=row.querySelector('span')?.textContent.trim();
+    if(label==='Otras capacitaciones docentes')row.remove();
+  });
+
+  const rows=[...refV9.querySelectorAll(':scope > div')];
+  const teacherRow=rows.find(row=>{
+    const label=row.querySelector('span')?.textContent.trim();
+    return label==='Capacitación docente'||label==='Actividad docente CIIE';
+  });
+  if(teacherRow){
+    const label=teacherRow.querySelector('span');
+    const b=teacherRow.querySelector('b');
+    const small=teacherRow.querySelector('small');
+    if(label)label.textContent='Capacitación docente';
+    if(b)b.textContent='Sin costo adicional';
+    if(small)small.textContent='reserva previa · requiere entrada del día';
+
+    if(![...refV9.querySelectorAll(':scope > div')].some(row=>row.querySelector('span')?.textContent.trim()==='Actividad docente CIIE')){
+      const ciieRow=document.createElement('div');
+      ciieRow.innerHTML='<span>Actividad docente CIIE</span><b>Sin cargo</b><small>inscripción oficial · acceso del día incluido</small>';
+      teacherRow.insertAdjacentElement('afterend',ciieRow);
+    }
+  }
+
+  if(![...refV9.querySelectorAll(':scope > div')].some(row=>row.querySelector('span')?.textContent.trim()==='Dibujo al natural en el Museo')){
+    const row=document.createElement('div');
+    row.innerHTML='<span>Dibujo al natural en el Museo · Prof. Lucila Andino</span><b>+$20.000</b><small>por participante</small>';
+    const ciieRow=[...refV9.querySelectorAll(':scope > div')].find(r=>r.querySelector('span')?.textContent.trim()==='Actividad docente CIIE');
+    if(ciieRow)ciieRow.insertAdjacentElement('afterend',row);else refV9.appendChild(row);
+  }
 }
 
 // Reemplazar la condición genérica de menores por la regla específica de talleres infantiles.
