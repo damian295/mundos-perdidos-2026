@@ -19,7 +19,8 @@ ACTIVITIES.forEach(a=>{
 });
 ACTIVITIES.filter(a=>a.title==='Peces en su tinta').forEach(a=>{
   a.audience='infancias';
-  a.type='Taller de arte para infancias · Lucila Andino';
+  a.presenter='Prof. Lucila Andino';
+  a.type='Taller de arte para infancias · Prof. Lucila Andino';
 });
 
 // Dibujo al natural en el Museo: adicional definitivo $20.000 por participante.
@@ -27,6 +28,8 @@ const drawingV9=ACTIVITIES.find(a=>a.id==='dibujo-natural-03');
 if(drawingV9){
   drawingV9.fee=DRAWING_FEE_V9;
   drawingV9.feeKind='taller';
+  drawingV9.presenter='Prof. Lucila Andino';
+  drawingV9.type='Taller para adultos · Prof. Lucila Andino';
 }
 
 // Corregir la capa de cálculo anterior: elimina el adicional docente y suma Dibujo al natural.
@@ -47,7 +50,7 @@ calculatePrice=function(){
 // Texto operativo visible junto a talleres y capacitaciones.
 const helpV9=document.querySelector('#activitiesSection .help-text');
 if(helpV9){
-  helpV9.innerHTML='La entrada cubre las actividades generales del día. Los <strong>talleres para infancias</strong> tienen un adicional de <strong>$5.000 por participante</strong>, salvo que se indique otro importe. Las <strong>capacitaciones docentes son gratuitas</strong>. Los talleres infantiles se realizan dentro del Museo y sus colecciones y son exclusivamente para niñas y niños inscriptos: al reservar, indicá sólo la cantidad de niñas/niños que participarán. Los adultos acompañantes realizan la acreditación y esperan fuera del espacio del taller durante la actividad.';
+  helpV9.innerHTML='La entrada cubre las actividades generales del día. Los <strong>talleres para infancias</strong> tienen un adicional de <strong>$5.000 por participante</strong>, salvo que se indique otro importe. Las capacitaciones docentes son gratuitas. Los talleres infantiles se realizan dentro del Museo y sus colecciones y son exclusivamente para niñas y niños inscriptos: al reservar, indicá sólo la cantidad de niñas/niños que participarán. Los adultos acompañantes realizan la acreditación y esperan fuera del espacio del taller durante la actividad.';
 }
 
 // Actualizar la referencia de valores sin tocar la estructura de la página.
@@ -62,7 +65,7 @@ if(teacherRowV9){
 const refV9=document.querySelector('.price-reference details');
 if(refV9&&!priceRowsV9.some(row=>row.querySelector('span')?.textContent.trim()==='Dibujo al natural en el Museo')){
   const row=document.createElement('div');
-  row.innerHTML='<span>Dibujo al natural en el Museo</span><b>+$20.000</b><small>por participante</small>';
+  row.innerHTML='<span>Dibujo al natural en el Museo · Prof. Lucila Andino</span><b>+$20.000</b><small>por participante</small>';
   if(teacherRowV9)teacherRowV9.insertAdjacentElement('afterend',row);else refV9.appendChild(row);
 }
 
