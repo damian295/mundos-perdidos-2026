@@ -118,7 +118,7 @@ function renderActivities(){
 function renderSummary(){
  const dates=selectedDates(),price=calculatePrice();
  $('summaryMode').textContent=state.mode==='full'?'Pase completo · 9 días':'Elegir mis días';
- $('summaryPaid').textContent=state.paid;$('summaryFree').textContent=state.free;$('summaryTotal').textContent=money(price.total);
+ if($('summaryPaid'))$('summaryPaid').textContent=state.paid;if($('summaryFree'))$('summaryFree').textContent=state.free;if($('summaryTotal'))$('summaryTotal').textContent=money(price.total);
  $('summaryDates').classList.toggle('muted',!dates.length);
  $('summaryDates').innerHTML=dates.length?dates.map(date=>`<span>${dayByDate(date).label}</span>`).join(''):'Todavía no elegiste días.';
  const chosen=ACTIVITIES.filter(a=>Number(state.activityQty[a.id]||0)>0&&dates.includes(a.date)),block=$('summaryActivitiesBlock');
@@ -131,7 +131,7 @@ function renderMode(){
  document.querySelectorAll('.mode-card').forEach(btn=>{const active=btn.dataset.mode===state.mode;btn.classList.toggle('active',active);btn.setAttribute('aria-pressed',String(active));});
  $('daysSection').classList.toggle('hidden',state.mode==='full');if(state.mode==='full')pruneActivities();
 }
-function renderPeople(){$('paidPeople').textContent=state.paid;$('freePeople').textContent=state.free;pruneActivities();}
+function renderPeople(){if($('paidPeople'))$('paidPeople').textContent=state.paid;if($('freePeople'))$('freePeople').textContent=state.free;pruneActivities();}
 function renderAll(){renderMode();renderPeople();renderDays();renderActivities();renderSummary();}
 
 function reservationCode(){return `MUN-TEST-${Date.now().toString(36).slice(-5).toUpperCase()}-${Math.random().toString(36).slice(2,5).toUpperCase()}`;}
