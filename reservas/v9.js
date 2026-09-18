@@ -70,7 +70,7 @@ if(!ciieNoteV9){
   ciieNoteV9.id='ciieAccessNoteV9';
   ciieNoteV9.className='ciie-access-note-v9';
 }
-ciieNoteV9.innerHTML='<div class="ciie-access-icon-v9" aria-hidden="true">🎓</div><div><strong>Actividades CIIE · sin cargo</strong><p>Si estás inscripto/a oficialmente por un CIIE en una actividad de las Jornadas, <b>no necesitás comprar entrada general para esa fecha</b>: la inscripción incluye el acceso a las Jornadas durante ese día.</p><small>Las demás capacitaciones docentes requieren reserva previa y se realizan con la entrada del día, sin costo adicional.</small></div>';
+ciieNoteV9.innerHTML='<div class="ciie-access-icon-v9" aria-hidden="true">🎓</div><div><strong>Capacitaciones docentes CIIE · acceso sin cargo.</strong><p>Los docentes inscriptos previamente por CIIE en una capacitación de las Jornadas ingresan sin cargo durante el día de esa actividad.</p><small>Las fechas y modalidades de inscripción se informarán a medida que queden confirmadas. Si no estás inscripto por CIIE, podés adquirir la entrada general del día correspondiente y participar de las actividades de la jornada según disponibilidad. La entrada general no reemplaza la inscripción oficial del CIIE.</small></div>';
 const peoplePanelV9=document.querySelector('.people-panel');
 if(peoplePanelV9)peoplePanelV9.insertAdjacentElement('afterend',ciieNoteV9);
 
