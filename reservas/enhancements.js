@@ -49,7 +49,7 @@ renderActivities=function(){
 renderSummary=function(){
  const dates=selectedDates(),price=calculatePrice();
  $('summaryMode').textContent=state.mode==='full'?'Pase completo · 9 días':'Elegir mis días';
- $('summaryPaid').textContent=state.paid;$('summaryFree').textContent=state.free;$('summaryTotal').textContent=money(price.total);
+ if($('summaryPaid'))$('summaryPaid').textContent=state.paid;if($('summaryFree'))$('summaryFree').textContent=state.free;if($('summaryTotal'))$('summaryTotal').textContent=money(price.total);
  $('summaryDates').classList.toggle('muted',!dates.length);
  $('summaryDates').innerHTML=dates.length?dates.map(date=>`<span>${dayByDate(date).label}</span>`).join(''):'Todavía no elegiste días.';
  const chosen=ACTIVITIES.filter(a=>Number(state.activityQty[a.id]||0)>0&&dates.includes(a.date)),block=$('summaryActivitiesBlock');
