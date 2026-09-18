@@ -68,7 +68,7 @@ v5Script.onload=()=>{
       v8Script.src='v8.js?v=3';
       v8Script.onload=()=>{
         const v9Script=document.createElement('script');
-        v9Script.src='v9.js?v=5';
+        v9Script.src='v9.js?v=6';
         v9Script.onload=()=>{
           const v10Script=document.createElement('script');
           v10Script.src='v10.js?v=2';
