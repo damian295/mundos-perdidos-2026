@@ -3,6 +3,10 @@
   if(new URLSearchParams(location.search).get('modo')!=='prueba-real')return;
 
   const BACKEND='https://script.google.com/macros/s/AKfycbzktEKSf2IhLeYb79s2uSBRWvo-cSBcRQq3lDi4bmGgVfK4WVNwpYg1QAho3PyS23XK/exec';
+  // Cupos de talleres: lectura pública y acotada desde la hoja "Cupos públicos".
+  // No expone la hoja Reservas ni modifica el motor general de disponibilidad.
+  const CUPOS_PUBLIC_PUBLISHED_ID='2PACX-1vT7WFzRwrwt7iNwigQoUSgzB2Ec74lb2AO4jHfkD2A6eVIMarvGS28Yz_8PAhkwZhrOFiD9ftgGwHHz';
+  const CUPOS_PUBLIC_GID='1386957732';
   const banner=document.getElementById('testBanner');
   if(banner){
     banner.textContent='PRUEBA REAL CONTROLADA · esta reserva sí se registra y envía correo';
@@ -20,6 +24,79 @@
     const parts=String(d||'').split('-');
     return parts.length===3?`${parts[2]}/${parts[1]}`:String(d||'');
   };
+
+  let workshopCapacityRequest=null;
+  function readGvizNumber(cell){
+    if(!cell)return 0;
+    const n=Number(cell.v);
+    if(Number.isFinite(n))return n;
+    const f=String(cell.f||'').replace(/\./g,'').replace(',','.').replace(/[^0-9.-]/g,'');
+    return Number(f)||0;
+  }
+  function applyWorkshopCapacity(payload){
+    const rows=payload&&payload.table&&payload.table.rows;
+    if(!Array.isArray(rows))throw new Error('cupos-invalidos');
+    let applied=0;
+    rows.forEach(row=>{
+      const c=row&&row.c||[];
+      const label=String((c[3]&&(c[3].f||c[3].v))||'');
+      if(!label.startsWith('MP · '))return;
+      const parts=label.split(' · ');
+      const id=parts[1]||'';
+      const a=ACTIVITIES.find(x=>x.id===id);
+      if(!a)return;
+      const capacity=readGvizNumber(c[4]);
+      const used=readGvizNumber(c[5]);
+      const remaining=Math.max(0,readGvizNumber(c[6]));
+      if(capacity>0){
+        a.capacity=capacity;
+        a.used=used;
+        a.remaining=remaining;
+        a.limited=true;
+        applied++;
+      }
+    });
+    if(!applied)throw new Error('cupos-vacios');
+    try{renderAll();}catch(_){}
+    try{updateFinalReviewV6();}catch(_){}
+    try{updateMobileSelectionV7();}catch(_){}
+    return applied;
+  }
+  function refreshWorkshopCapacity(){
+    if(workshopCapacityRequest)return workshopCapacityRequest;
+    workshopCapacityRequest=new Promise((resolve,reject)=>{
+      const cb='mpCupos_'+Date.now()+'_'+Math.random().toString(36).slice(2);
+      const script=document.createElement('script');
+      let done=false;
+      const cleanup=()=>{
+        try{delete window[cb];}catch(_){window[cb]=undefined;}
+        if(script.parentNode)script.remove();
+        workshopCapacityRequest=null;
+      };
+      const timer=setTimeout(()=>{
+        if(done)return;done=true;cleanup();reject(new Error('timeout-cupos'));
+      },6500);
+      window[cb]=payload=>{
+        if(done)return;done=true;clearTimeout(timer);
+        try{resolve(applyWorkshopCapacity(payload));}
+        catch(err){reject(err);}
+        finally{cleanup();}
+      };
+      script.onerror=()=>{
+        if(done)return;done=true;clearTimeout(timer);cleanup();reject(new Error('error-cupos'));
+      };
+      const qs=new URLSearchParams({
+        gid:CUPOS_PUBLIC_GID,
+        tqx:'out:json;responseHandler:'+cb,
+        tq:"select D,E,F,G,H where D starts with 'MP ·'",
+        headers:'1',
+        v:String(Date.now())
+      });
+      script.src='https://docs.google.com/spreadsheets/d/e/'+encodeURIComponent(CUPOS_PUBLIC_PUBLISHED_ID)+'/gviz/tq?'+qs.toString();
+      document.body.appendChild(script);
+    });
+    return workshopCapacityRequest;
+  }
 
   // Fuente independiente de precios para impedir que un valor corrupto, cacheado o
   // mal convertido llegue a Administración. Estos son los valores públicos vigentes.
@@ -99,7 +176,9 @@
     const actText=acts.map(a=>{
       const q=Number(state.activityQty[a.id]||0);
       const fee=q*Number(a.fee||0);
-      return `${a.title} (${q} participante(s)${fee?`, adicional $${Math.round(fee).toLocaleString('es-AR')}`:''})`;
+      // "Peces en su tinta" existe en cuatro fechas: guardar la fecha evita mezclar sus cupos.
+      const activityLabel=a.title==='Peces en su tinta'?`${a.title} · ${shortDate(a.date)}`:a.title;
+      return `${activityLabel} (${q} participante(s)${fee?`, adicional ${Math.round(fee).toLocaleString('es-AR')}`:''})`;
     }).join(' | ');
     const dni=document.getElementById('dni').value.replace(/\D/g,'');
     const dateSummary=dates.length===DAYS.length
@@ -272,6 +351,21 @@
     const err=validateForm();
     if(err){msg.textContent=err;msg.className='form-message error';return;}
 
+    // Antes de enviar, refrescar los cupos para evitar trabajar con un contador viejo.
+    try{await refreshWorkshopCapacity();}catch(_){ }
+    const overbooked=ACTIVITIES.find(a=>{
+      const q=Math.max(0,Number(state.activityQty[a.id]||0));
+      return q>0&&Number.isFinite(a.remaining)&&q>a.remaining;
+    });
+    if(overbooked){
+      msg.textContent=`Ya no quedan ${Number(state.activityQty[overbooked.id]||0)} lugares disponibles en ${overbooked.title}. Revisá la cantidad antes de enviar.`;
+      msg.className='form-message error';
+      try{renderActivities();renderSummary();}catch(_){}
+      btn.disabled=false;
+      btn.textContent='Generar pre-reserva';
+      return;
+    }
+
     let data;
     try{data=payload();}
     catch(ex){
@@ -321,4 +415,9 @@
   try{renderAll();}catch(_){ }
   try{updateFinalReviewV6();}catch(_){ }
   try{updateMobileSelectionV7();}catch(_){ }
+
+  // Sincronización quirúrgica de cupos de talleres. Se actualiza al abrir la página
+  // y periódicamente, sin tocar pagos, QR, calendarios ni cupos generales.
+  refreshWorkshopCapacity().catch(()=>{});
+  setInterval(()=>{refreshWorkshopCapacity().catch(()=>{});},60000);
 })();
