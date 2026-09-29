@@ -202,7 +202,10 @@
         entries+=canonicalBundle(paid,price);
         base+=paid*price.single;
       });
-      if(dates.length===DAYS.length){
+      const remainingDates=DAYS.filter(d=>!isPastEventDate(d.date)).map(d=>d.date);
+      if(remainingDates.length&&dates.length===remainingDates.length&&remainingDates.every(d=>dates.includes(d))){
+        // Si eligió todas las jornadas que todavía quedan, comparar también con el valor histórico
+        // del pase y aplicar automáticamente el menor importe, sin obligar al usuario a elegir una modalidad.
         entries=Math.min(entries,canonicalBundle(paid,CANONICAL_PRICES.full));
       }
     }
@@ -244,8 +247,10 @@
       return `${activityLabel} (${q} participante(s)${fee?`, adicional ${Math.round(fee).toLocaleString('es-AR')}`:''})`;
     }).join(' | ');
     const dni=document.getElementById('dni').value.replace(/\D/g,'');
-    const dateSummary=dates.length===DAYS.length
-      ? '26/09–04/10 · Pase completo'
+    const remainingDates=DAYS.filter(d=>!isPastEventDate(d.date)).map(d=>d.date);
+    const allRemaining=remainingDates.length&&dates.length===remainingDates.length&&remainingDates.every(d=>dates.includes(d));
+    const dateSummary=allRemaining
+      ? 'Todos los días restantes'
       : dates.length===1
         ? shortDate(dates[0])
         : `${dates.length} días seleccionados`;
