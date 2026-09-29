@@ -74,7 +74,7 @@ v5Script.onload=()=>{
           v11Script.src='v11.js?v=2';
           v11Script.onload=()=>{
             const liveScript=document.createElement('script');
-            liveScript.src='live-integration.js?v=11';
+            liveScript.src='live-integration.js?v=12';
             liveScript.onload=()=>{
               document.getElementById('testBanner')?.remove();
               const cleanUrl=new URL(location.href);
