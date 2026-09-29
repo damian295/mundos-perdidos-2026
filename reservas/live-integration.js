@@ -25,6 +25,69 @@
     return parts.length===3?`${parts[2]}/${parts[1]}`:String(d||'');
   };
 
+  // Cierre automático por fecha. Una jornada anterior a hoy en Argentina
+  // no puede volver a venderse ni aceptar inscripciones a sus talleres.
+  function argentinaTodayYmd(){
+    const parts=new Intl.DateTimeFormat('en-CA',{
+      timeZone:'America/Argentina/Buenos_Aires',
+      year:'numeric',month:'2-digit',day:'2-digit'
+    }).formatToParts(new Date());
+    const get=t=>parts.find(p=>p.type===t)?.value||'';
+    return `${get('year')}-${get('month')}-${get('day')}`;
+  }
+  function isPastEventDate(date){
+    return /^\d{4}-\d{2}-\d{2}$/.test(String(date||'')) && String(date)<argentinaTodayYmd();
+  }
+  function activityDateClosed(a){
+    return Boolean(a&&isPastEventDate(a.date));
+  }
+
+  const maxPlacesBeforePastDate=maxPlacesForActivity;
+  maxPlacesForActivity=function(a){
+    if(activityDateClosed(a))return 0;
+    return maxPlacesBeforePastDate(a);
+  };
+
+  const quotaTextBeforePastDate=quotaText;
+  quotaText=function(a){
+    if(activityDateClosed(a))return 'Inscripción cerrada · actividad finalizada';
+    return quotaTextBeforePastDate(a);
+  };
+
+  const renderDaysBeforePastDate=renderDays;
+  renderDays=function(){
+    // Limpiar cualquier fecha pasada que hubiera quedado seleccionada en modo por días.
+    if(state.mode!=='full'){
+      [...state.selected].forEach(date=>{if(isPastEventDate(date))state.selected.delete(date);});
+    }
+    renderDaysBeforePastDate();
+    document.querySelectorAll('.day-card[data-date]').forEach(card=>{
+      if(!isPastEventDate(card.dataset.date))return;
+      card.disabled=true;
+      card.setAttribute('aria-disabled','true');
+      card.classList.add('day-past-closed');
+      const price=card.querySelector('.day-price');
+      if(price)price.textContent='Finalizada';
+    });
+  };
+
+  const validateFormBeforePastDate=validateForm;
+  validateForm=function(){
+    const base=validateFormBeforePastDate();
+    if(base)return base;
+    if(state.mode!=='full'){
+      const past=selectedDates().find(isPastEventDate);
+      if(past)return 'No se puede reservar una jornada que ya finalizó.';
+    }
+    const closedActivity=ACTIVITIES.find(a=>activityDateClosed(a)&&Number(state.activityQty[a.id]||0)>0);
+    if(closedActivity)return `La inscripción para ${closedActivity.title} está cerrada porque la actividad ya finalizó.`;
+    return '';
+  };
+
+  const pastDateStyle=document.createElement('style');
+  pastDateStyle.textContent='.day-card.day-past-closed{opacity:.5;cursor:not-allowed;filter:grayscale(.25)}';
+  document.head.appendChild(pastDateStyle);
+
   let workshopCapacityRequest=null;
   function readGvizNumber(cell){
     if(!cell)return 0;
