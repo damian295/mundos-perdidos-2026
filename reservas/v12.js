@@ -28,6 +28,16 @@ function mpRemainingComboPriceV12(){
 function mpMoneyV12(n){
   return new Intl.NumberFormat('es-AR',{style:'currency',currency:'ARS',maximumFractionDigits:0}).format(Number(n||0));
 }
+function mpShortDateV12(date){
+  const p=String(date||'').split('-');
+  return p.length===3?`${Number(p[2])}/${Number(p[1])}`:String(date||'');
+}
+function mpRemainingDateRangeV12(){
+  const open=mpRemainingDatesV12();
+  if(!open.length)return '';
+  if(open.length===1)return mpShortDateV12(open[0]);
+  return `del ${mpShortDateV12(open[0])} al ${mpShortDateV12(open[open.length-1])}`;
+}
 
 // La modalidad única visible pasa a ser elegir días. Se conserva internamente la lógica histórica,
 // pero el usuario ya no tiene que decidir entre "días" y "pase completo".
@@ -65,7 +75,7 @@ if(priceRefV12){
       comboRow.id='remainingComboPriceV12';
       priceRefV12.insertBefore(comboRow,priceRefV12.querySelector(':scope > div')||null);
     }
-    comboRow.innerHTML=`<span>Todos los días restantes</span><b>${mpMoneyV12(comboPrice)}</b><small>por persona · ${openCount} jornadas disponibles</small>`;
+    comboRow.innerHTML=`<span>Entrada para todas las jornadas que quedan</span><b>${mpMoneyV12(comboPrice)}</b><small>por persona · incluye ${mpRemainingDateRangeV12()}</small>`;
   }else if(comboRow){
     comboRow.remove();
   }
@@ -111,10 +121,12 @@ function ensureRemainingDaysButtonV12(){
   const allSelected=mpAllRemainingSelectedV12();
   if(btn){
     btn.classList.toggle('active',allSelected);
-    btn.textContent=`${allSelected?'✓ ':''}Todos los días restantes · ${mpMoneyV12(comboPrice)} por persona`;
-    btn.title=allSelected?'Tocá para quitar la selección de todos los días restantes':'Seleccionar todas las jornadas que todavía quedan';
+    btn.textContent=`${allSelected?'✓ ':''}Entrada para todas las jornadas que quedan · ${mpMoneyV12(comboPrice)} por persona`;
+    btn.title=allSelected?'Tocá para quitar la selección de todas las jornadas restantes':'Seleccionar todas las jornadas que todavía quedan';
   }
-  if(help)help.textContent=allSelected?'El descuento ya está aplicado. Tocá el botón para quitar esta selección.':'O elegí uno o varios días.';
+  if(help)help.textContent=allSelected
+    ?`Incluye ${mpRemainingDateRangeV12()}. El precio promocional ya está aplicado.`
+    :`Incluye ${mpRemainingDateRangeV12()}. O elegí uno o varios días por separado.`;
 }
 
 const renderDaysBeforeV12=renderDays;
@@ -140,7 +152,7 @@ const renderSummaryBeforeV12=renderSummary;
 renderSummary=function(){
   renderSummaryBeforeV12();
   const title=document.getElementById('summaryMode');
-  if(title)title.textContent=mpAllRemainingSelectedV12()?'Todos los días restantes':'Entradas seleccionadas';
+  if(title)title.textContent=mpAllRemainingSelectedV12()?'Todas las jornadas que quedan':'Entradas seleccionadas';
 };
 
 if(!document.getElementById('mpSimplifyV12Styles')){
