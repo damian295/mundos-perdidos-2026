@@ -76,9 +76,12 @@ v5Script.onload=()=>{
             const v12Script=document.createElement('script');
             v12Script.src='v12.js?v=3';
             v12Script.onload=()=>{
-              const liveScript=document.createElement('script');
-              liveScript.src='live-integration.js?v=14';
-              liveScript.onload=()=>{
+              const v13Script=document.createElement('script');
+              v13Script.src='v13.js?v=1';
+              v13Script.onload=()=>{
+                const liveScript=document.createElement('script');
+                liveScript.src='live-integration.js?v=14';
+                liveScript.onload=()=>{
               document.getElementById('testBanner')?.remove();
               const cleanUrl=new URL(location.href);
               cleanUrl.searchParams.delete('modo');
@@ -89,8 +92,10 @@ v5Script.onload=()=>{
                 submit.textContent='Generar pre-reserva';
                 delete submit.dataset.awaitingProduction;
               }
+                };
+                document.head.appendChild(liveScript);
               };
-              document.head.appendChild(liveScript);
+              document.head.appendChild(v13Script);
             };
             document.head.appendChild(v12Script);
           };
