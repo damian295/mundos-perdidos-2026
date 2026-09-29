@@ -70,7 +70,7 @@ if(!ciieNoteV9){
   ciieNoteV9.id='ciieAccessNoteV9';
   ciieNoteV9.className='ciie-access-note-v9';
 }
-ciieNoteV9.innerHTML='<div class="ciie-access-icon-v9" aria-hidden="true">🎓</div><div><strong>Capacitaciones docentes CIIE · acceso sin cargo.</strong><p>Los docentes inscriptos previamente por CIIE en una capacitación de las Jornadas ingresan sin cargo durante el día de esa actividad.</p><small>Las fechas y modalidades de inscripción se informarán a medida que queden confirmadas. Si no estás inscripto por CIIE, podés adquirir la entrada general del día correspondiente y participar de las actividades de la jornada según disponibilidad. La entrada general no reemplaza la inscripción oficial del CIIE.</small></div>';
+ciieNoteV9.innerHTML='<div class="ciie-access-icon-v9" aria-hidden="true">🎓</div><div><strong>Capacitaciones docentes CIIE · acceso sin cargo.</strong><details class="ciie-details-v9"><summary>Ver información</summary><div class="ciie-details-body-v9"><p>Los docentes inscriptos previamente por CIIE en una capacitación de las Jornadas ingresan sin cargo durante el día de esa actividad.</p><small>Las fechas y modalidades de inscripción se informarán a medida que queden confirmadas. Si no estás inscripto por CIIE, podés adquirir la entrada general del día correspondiente y participar de las actividades de la jornada según disponibilidad. La entrada general no reemplaza la inscripción oficial del CIIE.</small></div></details></div>';
 const peoplePanelV9=document.querySelector('.people-panel');
 if(peoplePanelV9)peoplePanelV9.insertAdjacentElement('afterend',ciieNoteV9);
 
@@ -82,7 +82,14 @@ if(!document.getElementById('ciieAccessStyleV9')){
     .ciie-access-icon-v9{font-size:1.25rem;line-height:1;margin-top:2px}
     .ciie-access-note-v9 strong{display:block;color:#18342e;font-size:.94rem;margin-bottom:3px}
     .ciie-access-note-v9 p{margin:0 0 3px}.ciie-access-note-v9 b{color:#18342e}.ciie-access-note-v9 small{display:block;color:#667067;font-size:.76rem;line-height:1.35}
-    @media(max-width:640px){.ciie-access-note-v9{margin:12px 0 16px;padding:11px 12px;gap:9px;font-size:.8rem}.ciie-access-note-v9 strong{font-size:.89rem}.ciie-access-note-v9 small{font-size:.72rem}}
+    .ciie-details-v9{margin-top:2px;font-size:.76rem;color:#667067}
+    .ciie-details-v9 summary{display:inline-flex;align-items:center;gap:5px;cursor:pointer;color:#315a50;font-weight:750;list-style:none;padding:2px 0}
+    .ciie-details-v9 summary::-webkit-details-marker{display:none}
+    .ciie-details-v9 summary::after{content:'▾';font-size:.72rem;transition:transform .16s ease}
+    .ciie-details-v9[open] summary::after{transform:rotate(180deg)}
+    .ciie-details-body-v9{padding-top:6px}
+    .ciie-details-body-v9 p{font-size:.76rem;line-height:1.35;margin:0 0 4px}
+    @media(max-width:640px){.ciie-access-note-v9{margin:12px 0 16px;padding:11px 12px;gap:9px;font-size:.8rem}.ciie-access-note-v9 strong{font-size:.89rem}.ciie-access-note-v9 small,.ciie-details-v9,.ciie-details-body-v9 p{font-size:.72rem}}
   `;
   document.head.appendChild(style);
 }
