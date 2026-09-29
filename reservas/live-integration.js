@@ -165,9 +165,17 @@
   // mal convertido llegue a Administración. Estos son los valores públicos vigentes.
   const CANONICAL_PRICES={
     weekday:{single:5000,group:15000},
-    weekend:{single:7000,group:20000},
-    full:{single:30000,group:80000}
+    weekend:{single:7000,group:20000}
   };
+  // Combo dinámico por todas las jornadas que todavía quedan. El valor baja
+  // automáticamente a medida que avanza el evento; el 4/10 queda sólo entrada individual.
+  const REMAINING_COMBO_PRICES={6:20000,5:17000,4:14000,3:11000,2:8000};
+  function remainingEventDates(){
+    return DAYS.filter(d=>!isPastEventDate(d.date)).map(d=>d.date);
+  }
+  function remainingComboUnitPrice(){
+    return REMAINING_COMBO_PRICES[remainingEventDates().length]||null;
+  }
 
   function canonicalBundle(q,price){
     q=Math.max(0,Math.floor(Number(q)||0));
@@ -189,24 +197,25 @@
   function canonicalPrice(){
     const dates=selectedDates();
     const paid=Math.max(0,Math.floor(Number(state.paid)||0));
-    if(!dates.length||paid<1)return{entries:0,extras:0,total:0,base:0,saving:0};
+    if(!dates.length||paid<1)return{entries:0,extras:0,total:0,base:0,saving:0,comboApplied:false,comboUnit:null};
 
     let entries=0,base=0;
-    if(state.mode==='full'){
-      entries=canonicalBundle(paid,CANONICAL_PRICES.full);
-      base=paid*CANONICAL_PRICES.full.single;
-    }else{
-      dates.forEach(date=>{
-        const day=dayByDate(date);
-        const price=day&&day.kind==='weekend'?CANONICAL_PRICES.weekend:CANONICAL_PRICES.weekday;
-        entries+=canonicalBundle(paid,price);
-        base+=paid*price.single;
-      });
-      const remainingDates=DAYS.filter(d=>!isPastEventDate(d.date)).map(d=>d.date);
-      if(remainingDates.length&&dates.length===remainingDates.length&&remainingDates.every(d=>dates.includes(d))){
-        // Si eligió todas las jornadas que todavía quedan, comparar también con el valor histórico
-        // del pase y aplicar automáticamente el menor importe, sin obligar al usuario a elegir una modalidad.
-        entries=Math.min(entries,canonicalBundle(paid,CANONICAL_PRICES.full));
+    dates.forEach(date=>{
+      const day=dayByDate(date);
+      const price=day&&day.kind==='weekend'?CANONICAL_PRICES.weekend:CANONICAL_PRICES.weekday;
+      entries+=canonicalBundle(paid,price);
+      base+=paid*price.single;
+    });
+
+    const remainingDates=remainingEventDates();
+    const allRemaining=remainingDates.length>=2&&dates.length===remainingDates.length&&remainingDates.every(d=>dates.includes(d));
+    const comboUnit=allRemaining?remainingComboUnitPrice():null;
+    let comboApplied=false;
+    if(comboUnit){
+      const comboTotal=paid*comboUnit;
+      if(comboTotal<entries){
+        entries=comboTotal;
+        comboApplied=true;
       }
     }
 
@@ -218,7 +227,15 @@
     });
 
     const total=Math.round(entries+extras);
-    return{entries:Math.round(entries),extras:Math.round(extras),total,base:Math.round(base),saving:Math.max(0,Math.round(base-entries))};
+    return{
+      entries:Math.round(entries),
+      extras:Math.round(extras),
+      total,
+      base:Math.round(base),
+      saving:Math.max(0,Math.round(base-entries)),
+      comboApplied,
+      comboUnit
+    };
   }
 
   // El importe que ve el usuario y el que se envía salen de la misma cuenta canónica.
@@ -229,7 +246,23 @@
     let previous={};
     try{previous=previousCalculatePrice()||{};}catch(_){previous={};}
     const c=canonicalPrice();
-    return {...previous,base:c.base,saving:c.saving,total:c.total,canonicalEntries:c.entries,canonicalExtras:c.extras};
+    return {...previous,base:c.base,saving:c.saving,total:c.total,canonicalEntries:c.entries,canonicalExtras:c.extras,remainingComboApplied:c.comboApplied,remainingComboUnit:c.comboUnit};
+  };
+
+  const renderSummaryBeforeRemainingCombo=renderSummary;
+  renderSummary=function(){
+    renderSummaryBeforeRemainingCombo();
+    const c=canonicalPrice();
+    const dates=selectedDates();
+    const remaining=remainingEventDates();
+    const allRemaining=remaining.length>=2&&dates.length===remaining.length&&remaining.every(d=>dates.includes(d));
+    const title=document.getElementById('summaryMode');
+    if(title&&allRemaining&&c.comboApplied)title.textContent='Todos los días restantes';
+    const note=document.getElementById('discountNote');
+    if(note&&allRemaining&&c.comboApplied){
+      note.classList.remove('hidden');
+      note.textContent=`Combo de jornadas restantes aplicado automáticamente · Ahorrás ${money(c.saving)}.`;
+    }
   };
 
   function payload(){
@@ -247,7 +280,7 @@
       return `${activityLabel} (${q} participante(s)${fee?`, adicional ${Math.round(fee).toLocaleString('es-AR')}`:''})`;
     }).join(' | ');
     const dni=document.getElementById('dni').value.replace(/\D/g,'');
-    const remainingDates=DAYS.filter(d=>!isPastEventDate(d.date)).map(d=>d.date);
+    const remainingDates=remainingEventDates();
     const allRemaining=remainingDates.length&&dates.length===remainingDates.length&&remainingDates.every(d=>dates.includes(d));
     const dateSummary=allRemaining
       ? 'Todos los días restantes'
