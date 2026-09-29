@@ -61,6 +61,11 @@ if(priceRefV13){
       row.innerHTML='<span>Pintura del río</span><b>Sin costo adicional</b><small>con la entrada del día · reserva previa</small>';
     }
   });
+  if(![...priceRefV13.querySelectorAll(':scope > div')].some(row=>row.querySelector('span')?.textContent.trim()==='Pintura del río')){
+    const row=document.createElement('div');
+    row.innerHTML='<span>Pintura del río</span><b>Sin costo adicional</b><small>con la entrada del día · reserva previa</small>';
+    priceRefV13.appendChild(row);
+  }
   if(![...priceRefV13.querySelectorAll(':scope > div')].some(row=>row.querySelector('span')?.textContent.trim()==='Piedra, papel o tijera')){
     const row=document.createElement('div');
     row.innerHTML='<span>Piedra, papel o tijera</span><b>Sin costo adicional</b><small>con la entrada del día · reserva previa</small>';
