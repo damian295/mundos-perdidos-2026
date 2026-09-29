@@ -68,13 +68,13 @@ v5Script.onload=()=>{
       v8Script.src='v8.js?v=3';
       v8Script.onload=()=>{
         const v9Script=document.createElement('script');
-        v9Script.src='v9.js?v=6';
+        v9Script.src='v9.js?v=7';
         v9Script.onload=()=>{
           const v11Script=document.createElement('script');
           v11Script.src='v11.js?v=2';
           v11Script.onload=()=>{
             const v12Script=document.createElement('script');
-            v12Script.src='v12.js?v=2';
+            v12Script.src='v12.js?v=3';
             v12Script.onload=()=>{
               const liveScript=document.createElement('script');
               liveScript.src='live-integration.js?v=14';
