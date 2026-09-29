@@ -74,10 +74,10 @@ v5Script.onload=()=>{
           v11Script.src='v11.js?v=2';
           v11Script.onload=()=>{
             const v12Script=document.createElement('script');
-            v12Script.src='v12.js?v=1';
+            v12Script.src='v12.js?v=2';
             v12Script.onload=()=>{
               const liveScript=document.createElement('script');
-              liveScript.src='live-integration.js?v=13';
+              liveScript.src='live-integration.js?v=14';
               liveScript.onload=()=>{
               document.getElementById('testBanner')?.remove();
               const cleanUrl=new URL(location.href);
