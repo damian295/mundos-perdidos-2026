@@ -4,7 +4,7 @@
 // Sólo afecta nuevas pre-reservas y la información visible. No modifica reservas ya registradas,
 // backend, planilla, pagos, QR, correos ni cupos.
 const MP_CURRENT_ACTIVITY_FEES_V13={
-  'micro-30':5000,
+  'micro-30':0,
   'pintura-01':0,
   'prehistoria-02':0
 };
@@ -29,6 +29,11 @@ if(pinturaV13){
   pinturaV13.freeWithEntry=true;
   pinturaV13.type='Taller de arte · reserva previa · sin costo adicional';
 }
+const microV13=ACTIVITIES.find(a=>a.id==='micro-30');
+if(microV13){
+  microV13.freeWithEntry=true;
+  microV13.type='Taller para infancias · sin costo adicional';
+}
 const prehistoriaV13=ACTIVITIES.find(a=>a.id==='prehistoria-02');
 if(prehistoriaV13){
   prehistoriaV13.freeWithEntry=true;
@@ -37,7 +42,7 @@ if(prehistoriaV13){
 
 const helpV13=document.querySelector('#activitiesSection .help-text');
 if(helpV13){
-  helpV13.innerHTML='La entrada cubre las actividades generales del día. Algunas actividades requieren <strong>reserva previa</strong>. Cuando tienen un adicional, el valor se indica expresamente en cada actividad. Las que figuran como <strong>sin costo adicional</strong> están incluidas con la entrada del día. Las <strong>capacitaciones docentes no tienen costo adicional</strong> y requieren inscripción previa. Los talleres infantiles se realizan dentro del Museo y sus colecciones y son exclusivamente para niñas y niños inscriptos: al reservar, indicá sólo la cantidad de niñas/niños que participarán.';
+  helpV13.innerHTML='La entrada cubre las actividades generales del día. Algunas actividades requieren <strong>reserva previa</strong>. Cuando tienen un adicional, el valor se indica expresamente en cada actividad. Las que figuran como <strong>sin costo adicional</strong> están incluidas con la entrada del día. Las <strong>capacitaciones docentes no tienen costo adicional</strong> y requieren inscripción previa. Los talleres infantiles se realizan dentro del Museo y sus colecciones y son exclusivamente para niñas y niños inscriptos: al reservar, indicá sólo la cantidad de niñas/niños que participarán. Si sumás más participantes que entradas, el sistema ajusta automáticamente la cantidad de entradas necesarias.';
 }
 
 const activityRowBeforeV13=activityRowV3;
@@ -53,8 +58,8 @@ const priceRefV13=document.querySelector('.price-reference details');
 if(priceRefV13){
   [...priceRefV13.querySelectorAll(':scope > div')].forEach(row=>{
     const label=row.querySelector('span')?.textContent.trim()||'';
-    if(label==='Taller para infancias'){
-      row.innerHTML='<span>Micromundos II</span><b>+$5.000</b><small>por participante</small>';
+    if(['Taller para infancias','Talleres para infancias','Micromundos II'].includes(label)){
+      row.innerHTML='<span>Talleres para infancias</span><b>Sin costo adicional</b><small>con la entrada del día · reserva previa</small>';
     }else if(label==='Peces en su tinta'){
       row.innerHTML='<span>Peces en su tinta</span><b>+$10.000</b><small>por participante</small>';
     }else if(label==='Pintura del río'){
@@ -92,6 +97,22 @@ renderSummary=function(){
   const materials=document.getElementById('materialsNote');
   if(materials)materials.classList.add('hidden');
 };
+
+// Si se suma un lugar en un taller, se ajusta el mínimo de entradas necesarias.
+document.addEventListener('click',event=>{
+  const plus=event.target.closest('#activitiesList [data-activity][data-delta="1"]');
+  if(!plus)return;
+  const current=Math.max(0,Number(state.activityQty[plus.dataset.activity]||0));
+  const needed=current+1;
+  const attendees=Math.max(0,Number(state.paid||0))+Math.max(0,Number(state.free||0));
+  if(needed<=attendees)return;
+  state.paid=Math.min(20,Math.max(1,Number(state.paid||1)+(needed-attendees)));
+  setTimeout(()=>{
+    try{renderPeople();renderDays();renderSummary();}catch(_){}
+    try{updateFinalReviewV6();}catch(_){}
+    try{updateMobileSelectionV7();}catch(_){}
+  },0);
+},true);
 
 if(!document.getElementById('mpV13Styles')){
   const style=document.createElement('style');
