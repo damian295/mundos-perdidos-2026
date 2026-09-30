@@ -110,6 +110,9 @@
       const id=parts[1]||'';
       const a=ACTIVITIES.find(x=>x.id===id);
       if(!a)return;
+      // Los talleres de jornadas ya finalizadas se conservan sólo como historial
+      // en la planilla; no alimentan contadores visibles en la web.
+      if(isPastEventDate(a.date))return;
       const capacity=readGvizNumber(c[1]);
       const used=readGvizNumber(c[2]);
       const remaining=Math.max(0,readGvizNumber(c[3]));
