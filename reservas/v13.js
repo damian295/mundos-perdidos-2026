@@ -42,7 +42,7 @@ if(prehistoriaV13){
 
 const helpV13=document.querySelector('#activitiesSection .help-text');
 if(helpV13){
-  helpV13.innerHTML='La entrada cubre las actividades generales del día. Algunas actividades requieren <strong>reserva previa</strong>. Cuando tienen un adicional, el valor se indica expresamente en cada actividad. Las que figuran como <strong>sin costo adicional</strong> están incluidas con la entrada del día. Las <strong>capacitaciones docentes no tienen costo adicional</strong> y requieren inscripción previa. Los talleres infantiles se realizan dentro del Museo y sus colecciones y son exclusivamente para niñas y niños inscriptos: al reservar, indicá sólo la cantidad de niñas/niños que participarán. Si sumás más participantes que entradas, el sistema ajusta automáticamente la cantidad de entradas necesarias.';
+  helpV13.innerHTML='La entrada cubre las actividades generales del día. Algunas actividades requieren <strong>reserva previa</strong>. Cuando tienen un adicional, el valor se indica expresamente en cada actividad. Las que figuran como <strong>sin costo adicional</strong> están incluidas con la entrada del día. Las <strong>capacitaciones docentes no tienen costo adicional</strong> y requieren inscripción previa. Los talleres infantiles se realizan dentro del Museo y sus colecciones y son exclusivamente para niñas y niños inscriptos: al reservar, indicá sólo la cantidad de niñas/niños que participarán. La cantidad que indiques en cada actividad reserva lugares únicamente y no modifica la cantidad ni el precio de las entradas.';
 }
 
 const activityRowBeforeV13=activityRowV3;
@@ -98,21 +98,14 @@ renderSummary=function(){
   if(materials)materials.classList.add('hidden');
 };
 
-// Si se suma un lugar en un taller, se ajusta el mínimo de entradas necesarias.
-document.addEventListener('click',event=>{
-  const plus=event.target.closest('#activitiesList [data-activity][data-delta="1"]');
-  if(!plus)return;
-  const current=Math.max(0,Number(state.activityQty[plus.dataset.activity]||0));
-  const needed=current+1;
-  const attendees=Math.max(0,Number(state.paid||0))+Math.max(0,Number(state.free||0));
-  if(needed<=attendees)return;
-  state.paid=Math.min(20,Math.max(1,Number(state.paid||1)+(needed-attendees)));
-  setTimeout(()=>{
-    try{renderPeople();renderDays();renderSummary();}catch(_){}
-    try{updateFinalReviewV6();}catch(_){}
-    try{updateMobileSelectionV7();}catch(_){}
-  },0);
-},true);
+// Los contadores de actividades reservan lugares y no modifican entradas ni precios.
+maxPlacesForActivity=function(a){
+  if(typeof registrationClosedV8==='function'&&registrationClosedV8(a))return 0;
+  if(Number.isFinite(a.remaining))return Math.max(0,Number(a.remaining));
+  if(Number.isFinite(a.capacity))return Math.max(0,Number(a.capacity));
+  if(Number.isFinite(a.capacityPlan))return Math.max(0,Number(a.capacityPlan));
+  return 50;
+};
 
 if(!document.getElementById('mpV13Styles')){
   const style=document.createElement('style');
