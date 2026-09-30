@@ -102,15 +102,17 @@
     let applied=0;
     rows.forEach(row=>{
       const c=row&&row.c||[];
-      const label=String((c[3]&&(c[3].f||c[3].v))||'');
+      // La consulta GViz selecciona D,E,F,G,H, por lo que el arreglo devuelto
+      // queda reindexado desde cero: D->c[0], E->c[1], F->c[2], G->c[3], H->c[4].
+      const label=String((c[0]&&(c[0].f||c[0].v))||'');
       if(!label.startsWith('MP · '))return;
       const parts=label.split(' · ');
       const id=parts[1]||'';
       const a=ACTIVITIES.find(x=>x.id===id);
       if(!a)return;
-      const capacity=readGvizNumber(c[4]);
-      const used=readGvizNumber(c[5]);
-      const remaining=Math.max(0,readGvizNumber(c[6]));
+      const capacity=readGvizNumber(c[1]);
+      const used=readGvizNumber(c[2]);
+      const remaining=Math.max(0,readGvizNumber(c[3]));
       if(capacity>0){
         a.capacity=capacity;
         a.used=used;
