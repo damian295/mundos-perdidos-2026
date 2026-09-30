@@ -32,7 +32,13 @@ const state={mode:'days',paid:1,free:0,selected:new Set(),activityQty:{}};
 const $=id=>document.getElementById(id);
 const money=n=>new Intl.NumberFormat('es-AR',{style:'currency',currency:'ARS',maximumFractionDigits:0}).format(Number(n||0));
 const dayByDate=date=>DAYS.find(d=>d.date===date);
-const selectedDates=()=>state.mode==='full'?DAYS.map(d=>d.date):DAYS.filter(d=>state.selected.has(d.date)).map(d=>d.date);
+function bookingTodayYmd(){
+ const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Argentina/Buenos_Aires',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
+ const get=type=>parts.find(p=>p.type===type)?.value||'';
+ return `${get('year')}-${get('month')}-${get('day')}`;
+}
+function bookingDatePassed(date){return /^\d{4}-\d{2}-\d{2}$/.test(String(date||''))&&String(date)<bookingTodayYmd();}
+const selectedDates=()=>(state.mode==='full'?DAYS:DAYS.filter(d=>state.selected.has(d.date))).filter(d=>!bookingDatePassed(d.date)).map(d=>d.date);
 
 function bundlePrice(q,price){
  q=Math.max(0,Math.floor(Number(q)||0));
@@ -88,7 +94,7 @@ function quotaText(a){
 
 function renderDays(){
  const host=$('daysGrid');
- host.innerHTML=DAYS.map(d=>{
+ host.innerHTML=DAYS.filter(d=>!bookingDatePassed(d.date)).map(d=>{
   const selected=state.selected.has(d.date),p=d.kind==='weekend'?PRICES.weekend:PRICES.weekday,group=bundlePrice(state.paid,p);
   return `<button type="button" class="day-card ${selected?'selected':''}" data-date="${d.date}" aria-pressed="${selected}"><div class="day-top"><time>${d.label}</time><span class="day-price">${money(p.single)}</span></div><h4>${d.theme}</h4><p>${d.highlights}</p><p style="margin-top:9px;color:#315a50"><strong>Tu grupo: ${money(group.cost)}</strong></p><span class="check">✓</span></button>`;
  }).join('');
@@ -97,7 +103,7 @@ function renderDays(){
   if(state.selected.has(date))state.selected.delete(date);else state.selected.add(date);
   pruneActivities();renderAll();
  }));
- $('selectedDaysBadge').textContent=`${state.selected.size} seleccionada${state.selected.size===1?'':'s'}`;
+ const selectedCount=selectedDates().length;$('selectedDaysBadge').textContent=`${selectedCount} seleccionada${selectedCount===1?'':'s'}`;
 }
 
 function renderActivities(){
