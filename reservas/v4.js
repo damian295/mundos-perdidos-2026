@@ -80,7 +80,7 @@ v5Script.onload=()=>{
               v13Script.src='v13.js?v=2';
               v13Script.onload=()=>{
                 const liveScript=document.createElement('script');
-                liveScript.src='live-integration.js?v=14';
+                liveScript.src='live-integration.js?v=15';
                 liveScript.onload=()=>{
               document.getElementById('testBanner')?.remove();
               const cleanUrl=new URL(location.href);
