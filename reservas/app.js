@@ -7,7 +7,7 @@ const DAYS=[
  {date:'2026-09-27',label:'Domingo 27',kind:'weekend',theme:'Río conocido · Arte, tierra y paisaje',highlights:'Pioneros aventureros del Río · Origen de la Tierra · Performance · Arte en vivo'},
  {date:'2026-09-28',label:'Lunes 28',kind:'weekday',theme:'Río conocido · Miradas y recorridos',highlights:'Peces en su tinta · Taller para infancias · Historia de San Nicolás · Recorrido por la muestra'},
  {date:'2026-09-29',label:'Martes 29',kind:'weekday',theme:'Río desconocido · Paleontología y biogeografía',highlights:'Peces en su tinta · Taller para infancias · Paleoarte regional · Mastodonte de Sánchez'},
- {date:'2026-09-30',label:'Miércoles 30',kind:'weekday',theme:'Río conocido y desconocido · Biodiversidad',highlights:'Capacitación docente · Peces en su tinta · Micromundos II · Aves de San Nicolás'},
+ {date:'2026-09-30',label:'Miércoles 30',kind:'weekday',theme:'Río conocido y desconocido · Biodiversidad',highlights:'¡Pura ciencia! · Peces en su tinta · Micromundos II · ¿Para qué sirve la ciencia?'},
  {date:'2026-10-01',label:'Jueves 1',kind:'weekday',theme:'Río conocido · Arte, patrimonio y educación',highlights:'Capacitación docente · Peces en su tinta · Pintura del río · Arqueólogos por un día'},
  {date:'2026-10-02',label:'Viernes 2',kind:'weekday',theme:'Río legendario · Paisaje, fauna y memoria',highlights:'Capacitación docente · Mito del Carpincho Blanco · Taller para infancias · Música'},
  {date:'2026-10-03',label:'Sábado 3',kind:'weekend',theme:'Río futuro · Fauna, clima y conservación',highlights:'Capacitación docente · Serpientes · Ciervo de los Pantanos · Aguará Guazú · ENSO'},
