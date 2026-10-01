@@ -27,7 +27,7 @@ ACTIVITIES.forEach(a=>{
 // Taller del programa que debe quedar visible entre las actividades seleccionables.
 if(!ACTIVITIES.some(a=>a.id==='arqueologos-01')){
   ACTIVITIES.push({
-    id:'arqueologos-01',date:'2026-10-01',time:'19:00',type:'Taller con reserva',title:'Arqueólogos por un día',
+    id:'arqueologos-01',date:'2026-10-01',time:'18:00',type:'Taller con reserva',title:'Arqueólogos por un día',
     capacity:null,remaining:null,group:'special',fee:0,requiredReservation:true
   });
 }
