@@ -59,7 +59,7 @@ const v5Script=document.createElement('script');
 v5Script.src='v5.js?v=3';
 v5Script.onload=()=>{
   const v6Script=document.createElement('script');
-  v6Script.src='v6.js?v=2';
+  v6Script.src='v6.js?v=3';
   v6Script.onload=()=>{
     const v7Script=document.createElement('script');
     v7Script.src='v7.js?v=2';
