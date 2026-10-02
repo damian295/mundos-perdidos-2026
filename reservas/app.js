@@ -21,9 +21,9 @@ const ACTIVITIES=[
  {id:'biogeo-29',date:'2026-09-29',time:'18:30',type:'Taller para infancias',title:'¡Cada cual en su lugar! · La Biogeografía',capacity:25,remaining:25,limited:true},
  {id:'docencia-30',date:'2026-09-30',time:'Horario de formación',type:'Capacitación docente',title:'¿Para qué sirve la ciencia?',capacity:null,remaining:null,unlimited:true},
  {id:'micro-30',date:'2026-09-30',time:'18:30',type:'Taller para infancias',title:'Taller Micromundos II · El mundo microscópico',capacity:25,remaining:25,limited:true},
- {id:'docencia-01',date:'2026-10-01',time:'Horario de formación',type:'Capacitación docente',title:'¿Cómo abordar la problemática ambiental situada?',capacity:null,remaining:null,unlimited:true},
+ {id:'docencia-01',date:'2026-10-01',time:'Horario de formación',type:'Capacitación docente',title:'Leer, enseñar y aprender desde la narrativa',capacity:null,remaining:null,unlimited:true},
  {id:'pintura-01',date:'2026-10-01',time:'18:00',type:'Taller de arte · reserva previa',title:'Pintura del río',capacity:12,remaining:12,limited:true,requiredReservation:true},
- {id:'docencia-02',date:'2026-10-02',time:'Horario de formación',type:'Capacitación docente',title:'Leer, escribir, enseñar y aprender desde la narrativa',capacity:null,remaining:null,unlimited:true},
+ {id:'docencia-02',date:'2026-10-02',time:'Horario de formación',type:'Capacitación docente',title:'¿Cómo abordar la problemática ambiental situada?',capacity:null,remaining:null,unlimited:true},
  {id:'prehistoria-02',date:'2026-10-02',time:'18:30',type:'Taller para infancias',title:'Piedra, papel o tijera: animales prehistóricos',capacity:25,remaining:25,limited:true},
  {id:'docencia-03',date:'2026-10-03',time:'Mañana',type:'Capacitación docente · CIIE',title:'Capacitación docente · Evangelina Romano',capacity:null,remaining:null,unlimited:true}
 ];
