@@ -31,12 +31,12 @@ if(pinturaV8){
   pinturaV8.fee=30000;
 }
 
-// Dibujo al natural en el Museo: sábado 3, turno mañana, adultos, cupo 12.
+// Dibujo al natural en el Museo: sábado 3 a las 15:00, adultos, cupo 12. Inscripción abierta hasta la actividad.
 if(!ACTIVITIES.some(a=>a.id==='dibujo-natural-03')){
   ACTIVITIES.push({
     id:'dibujo-natural-03',
     date:'2026-10-03',
-    time:'Mañana',
+    time:'15:00',
     type:'Taller para adultos · Lucila Andino',
     title:'Dibujo al natural en el Museo',
     capacity:12,
@@ -46,9 +46,7 @@ if(!ACTIVITIES.some(a=>a.id==='dibujo-natural-03')){
     group:'special',
     fee:0,
     presenter:'Lucila Andino',
-    audience:'adultos',
-    registrationDeadline:LUCILA_DEADLINE_V8,
-    registrationDeadlineLabel:LUCILA_DEADLINE_LABEL_V8
+    audience:'adultos'
   });
 }
 
